@@ -1,9 +1,0 @@
-repair:
-Renaming com.apple.TimeMachine.orig-fs/com.apple.TimeMachine.electra-prejailbreak back to orig-fs/electra-prejailbreak after uninstalling TimeMachine on iOS
-
-Update: Now you can use snapUtil to create snapshots instead of using snappy
-
-You can get the compiled version of snapUtil from http://okanon.github.io/cydia/ (thanks @cxx_flags for compiling snapUtil and providing it in his personal source)
-You can get the compiled version of snappy from http://repo.bingner.com/ (thanks to @sbingner for making and compiling snappy and providing it in his personal source)
-
-You can get the Deb package for TimeMachine on iOS from https://github.com/Halo-Michael/TimeMachine-on-iOS/
