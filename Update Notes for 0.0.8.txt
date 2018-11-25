@@ -5,3 +5,5 @@ The log output is now more detailed and solves the problem of using a snapUtil b
 other:
 Cydia plugin text description optimization
 Now canceled support for iOS 11.4.1 and above (iOS12), after all, there are too many uncertainties in the future.
+
+You can get the Deb package for TimeMachine on iOS from https://github.com/Halo-Michael/TimeMachine-on-iOS/  (That is not a repo)
