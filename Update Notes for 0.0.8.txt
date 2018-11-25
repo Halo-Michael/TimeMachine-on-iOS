@@ -1,0 +1,7 @@
+﻿optimization:
+Increase the distinction between iOS10 and iOS11
+Now correctly keep seven snapshots created by TimeMachine on iOS on iOS10 instead of eight
+The log output is now more detailed and solves the problem of using a snapUtil backup snapshot to cause no log output.
+other:
+Cydia plugin text description optimization
+Now canceled support for iOS 11.4.1 and above (iOS12), after all, there are too many uncertainties in the future.
