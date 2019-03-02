@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "➡️Now rename your truly rootfs snapshot from com.apple.TimeMachine.orig.fs to orig-fs;now you'll be able to use 3rd-recovery tool."
+echo "⚠️DO NOT REMOVE THE SNAPSHOT NAMED <electra-prejailbreak> OR <orig-fs> THEY ARE YOUR ORIG ROOTFS SNAPSHOT!"
+echo "➡️Remove TimeMachine on iOS successful"
+exit 0
+

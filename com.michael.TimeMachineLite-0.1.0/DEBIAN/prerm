@@ -1,0 +1,43 @@
+#!/bin/sh
+
+dsnappy() {
+check_Torig_fs=`snappy -f / -l | grep "^com.apple.TimeMachine.orig-fs$"`
+check_Telectra_prejailbreak=`snappy -f / -l | grep "^com.apple.TimeMachine.electra-prejailbreak$"`
+if [[ "$check_Torig_fs" == "com.apple.TimeMachine.orig-fs" ]]; then
+      snappy -f / -r com.apple.TimeMachine.orig-fs --to orig-fs
+      fi
+if [[ "$check_Telectra_prejailbreak" == "com.apple.TimeMachine.electra-prejailbreak" ]]; then
+      snappy -f / -r com.apple.TimeMachine.electra-prejailbreak --to electra-prejailbreak
+      fi
+}
+
+dsnaputil() {
+check_Torig_fs=`snapUtil -l / | grep "^com.apple.TimeMachine.orig-fs$"`
+check_Telectra_prejailbreak=`snapUtil -l / | grep "^com.apple.TimeMachine.electra-prejailbreak$"`
+if [[ "$check_Torig_fs" == "com.apple.TimeMachine.orig-fs" ]]; then
+      snapUtil -n com.apple.TimeMachine.orig-fs orig-fs /
+      fi
+if [[ "$check_Telectra_prejailbreak" == "com.apple.TimeMachine.electra-prejailbreak" ]]; then
+      snapUtil -n com.apple.TimeMachine.electra-prejailbreak electra-prejailbreak /
+      fi
+}
+
+dchecksnapshot() {
+if [ -f "/usr/bin/snappy" ];then
+      dsnappy
+      else
+      dsnaputil
+      fi
+}
+
+Version=`sw_vers -productVersion`
+
+launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist
+if [[ $Version == 11.* ]] || [[ $Version == 12.* ]];then
+     echo "iOS11 or iOS12 founded, now checking orig snapshot..."
+     dchecksnapshot
+     else
+     echo "iOS10 founded, skip orig snapshot check."
+     fi
+exit 0
+

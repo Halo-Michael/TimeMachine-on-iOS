@@ -1,0 +1,131 @@
+dsnappycheck() {
+check_orig_fs=`snappy -f / -l | grep "^orig-fs$"`
+check_electra_prejailbreak=`snappy -f / -l | grep "^electra-prejailbreak$"`
+if [[ "$check_orig_fs" == "orig-fs" ]]; then
+      snappy -f / -r orig-fs --to com.apple.TimeMachine.orig-fs
+      fi
+if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
+      snappy -f / -r electra-prejailbreak --to com.apple.TimeMachine.electra-prejailbreak
+      fi
+}
+
+
+dsnappy11_12rootfs() {
+line9=`snappy -f / -l | sed -n '9p'`
+if [ ! $line9 ]; then
+      snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
+      else
+      snapshotearliest=`snappy -f / -l | sed -n '3p' `
+      snappy -f / -d $snapshotearliest
+      snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
+      fi
+}
+
+dsnappy10rootfs() {
+line8=`snappy -f / -l | sed -n '8p'`
+if [ ! $line8 ]; then
+      snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
+      else
+      snapshotearliest=`snappy -f / -l | sed -n '2p' `
+      snappy -f / -d $snapshotearliest
+      snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
+      fi
+}
+
+dsnappydatafs() {
+line8=`snappy -f /private/var -l | sed -n '8p'` 
+if [ ! $line8 ]; then
+      snappy -f /private/var -c "com.apple.TimeMachine.`date +%F-%T`"
+      else
+      snapshotearliest2=`snappy -f /private/var -l | sed -n '2p' `
+      snappy -f /private/var -d $snapshotearliest2
+      snappy -f /private/var -c "com.apple.TimeMachine.`date +%F-%T`"
+      fi
+}
+
+dsnaputilcheck() {
+check_orig_fs=`snapUtil -l / | grep "^orig-fs$"`
+check_electra_prejailbreak=`snapUtil -l / | grep "^electra-prejailbreak$"`
+if [[ "$check_orig_fs" == "orig-fs" ]]; then
+      snapUtil -n orig-fs com.apple.TimeMachine.orig-fs /
+      fi
+if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
+      snapUtil -n electra-prejailbreak com.apple.TimeMachine.electra-prejailbreak /
+      fi
+}
+
+dsnaputil11_12rootfs() {
+line8=`snapUtil -l / | sed -n '8p'`
+if [ ! $line8 ]; then
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
+      else
+      snapshotearliest=`snapUtil -l / | sed -n '2p' `
+      snapUtil -d $snapshotearliest /
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
+      fi
+}
+
+dsnaputil10rootfs() {
+line7=`snapUtil -l / | sed -n '7p'`
+if [ ! $line7 ]; then
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
+      else
+      snapshotearliest=`snapUtil -l / | sed -n '1p' `
+      snapUtil -d $snapshotearliest /
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
+      fi
+}
+
+dsnaputildatafs() {
+line7=`snapUtil -l /private/var | sed -n '7p'` 
+if [ ! $line7 ]; then
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /private/var
+      else
+      snapshotearliest2=`snapUtil -l /private/var | sed -n '1p' `
+      snapUtil -d $snapshotearliest2 /private/var
+      snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /private/var
+      fi
+}
+
+dios10() {
+echo "iOS10 founded"
+if [ -f "/usr/bin/snappy" ];then
+      echo "snappy founded"
+      dsnappy10rootfs
+      dsnappydatafs
+      else
+      echo "snapUtil founded"
+      echo "Creating rootfs snapshot..."
+      dsnaputil10rootfs
+      echo "Creating datafs snapshot..."
+      dsnaputildatafs
+      fi
+}
+
+dios11_12() {
+echo "iOS11 or iOS12 founded"
+if [ -f "/usr/bin/snappy" ];then
+      echo "snappy founded"
+      echo "Checking your orig shanshot..."
+      dsnappycheck
+      dsnappy11_12rootfs
+      dsnappydatafs
+      else
+      echo "snapUtil founded"
+      echo "Checking your orig shanshot..."
+      dsnaputilcheck
+      echo "Creating rootfs snapshot..."
+      dsnaputil11_12rootfs
+      echo "Creating datafs snapshot..."
+      dsnaputildatafs
+      fi
+}
+
+Version=`sw_vers -productVersion`
+if [[ $Version == 11.* ]] || [[ $Version == 12.* ]];then
+     dios11_12
+     else
+     dios10
+     fi
+echo "TimeMachine on iOS's work is down, enjoy safety."
+

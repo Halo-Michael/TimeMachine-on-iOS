@@ -1,0 +1,6 @@
+Make TimeMachine looks "more open source"
+So there need a file named "Makefile"
+Simplify the way of system version checking
+Now support for iOS 11.4.x and above (iOS12).
+
+You can get the Deb package for TimeMachine on iOS from https://github.com/Halo-Michael/TimeMachine-on-iOS/  (That is not a repo)
