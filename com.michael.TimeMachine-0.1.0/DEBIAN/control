@@ -5,7 +5,7 @@ Name: TimeMachine on iOS
 Author: halo_michael <yc992147156@me.com>
 Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
-Depends: com.bingner.snappy, firmware (>= 10.3), firmware (<= 12.1.2)
+Depends: com.bingner.snappy|io.okanon.snaputil, firmware (>= 10.3), firmware (<= 12.1.2)
 Replaces: com.michael.TimeMachineLite
 Conflicts: com.michael.TimeMachineLite
 Provides: com.michael.TimeMachineLite
