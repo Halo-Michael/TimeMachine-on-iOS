@@ -1,0 +1,58 @@
+#!/bin/sh
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+      echo "Run this as root!"
+      exit 1
+fi
+
+echo "You are setting TimeMachine now! If you DO NOT KNOW WHAT ARE YOU DOING, please press any key except y to exit."
+sleep 2
+read -p "Are you really know you are setting TimeMachine?(y/n)" confirm
+if [ "$confirm"x = "y"x ]; then
+      read -p "Enter 1 and return to select the number of snapshots you need to create for TimeMachine; enter 2 and return to restore the default settings for TimeMachine; enter any other characters and return or return directly to exit.(1/2/?)" choice
+      if [ "$choice"x = "1"x ]; then
+            echo "Now setting TimeMachine."
+            read -p "Please set the maximum number of rootfs snapshot backups for TimeMachine." setrootsnnum
+            read -p "Please set the maximum number of datafs snapshot backups for TimeMachine." setdatasnnum
+            read -p "Are you sure you want to backup up up at most ${setrootsnnum} snapshot for the rootfs and ${setdatasnnum} snapshots for the datafs?(y/n)" makesure
+            if [ "$makesure"x = "y"x ]; then
+                  if [ ! -f "/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" ]; then
+                        plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+                  fi
+                  plutil -key setrootsnnum -int ${setrootsnnum} /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+                  plutil -key setdatasnnum -int ${setdatasnnum} /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+                  echo "Successfully set TimeMachine to backup up up at most ${setrootsnnum} snapshot for rootfs and ${setdatasnnum} snapshots for datafs."
+                  echo "Now exit."
+                  sleep 3
+                  exit 0
+            elif [ "$makesure"x = "n"x ]; then
+                  echo "Users chose to stop, now exit."
+                  echo "Now exit."
+                  sleep 2
+                  exit 0
+            else
+                  echo "You may have typed incorrectly. Please check your input carefully and try again."
+                  echo "Now exit."
+                  sleep 2
+                  exit 1
+            fi
+      elif [ "$choice"x = "2"x ]; then
+            rm -rf /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+            echo "TimeMachine has restored its default settings."
+            echo "Now exit."
+            sleep 2
+            exit 0
+      else
+            echo "Now exit."
+            sleep 1
+            exit 0
+      fi
+elif [ "$confirm"x = "n"x ]; then
+      echo "Users chose to stop, now exit."
+      sleep 1
+      exit 0
+else
+      echo "Invalid parameters, you have no idea what are you doing! Now exit!"
+      sleep 2
+      exit 1
+fi

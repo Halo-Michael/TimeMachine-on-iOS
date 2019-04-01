@@ -1,5 +1,5 @@
 Package: com.michael.TimeMachine
-Version: 0.1.1
+Version: 0.2.0
 Section: Tweaks
 Name: TimeMachine on iOS
 Author: halo_michael <yc992147156@me.com>
@@ -10,7 +10,8 @@ Replaces: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios
 Conflicts: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Provides: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Architecture: iphoneos-arm
-Description: TimeMachine on iOS will creat a rootfs snapshot and a datafs snapshot at 2:00AM everyday;and delete the oldest snapshots when you have more than 7 snapshots.
+Description: Now you can use "setTimeMachine" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine!
+ TimeMachine on iOS will creat a rootfs snapshot and a datafs snapshot at 2:00AM everyday;and delete the oldest snapshots when you have more than 7 snapshots.
  TimeMachine on iOS will creat a rootfs snapshot and a datafs snapshot at 2:00AM everyday;and delete the oldest snapshots when you have more than 7 snapshots.
  .
  ⚠️TimeMachine on iOS will rename your orig snapshot's name from orig-fs to com.apple.TimeMachine.orig-fs,because when you use a snapshot to recovery,jailbreak will rename this snapshot to orig-fs again;it will remove your truly orig rootfs snapshot;however,you can still delete this tweak to rename your truly rootfs snapshot from com.apple.TimeMachine.orig-fs to orig-fs again.After that,you may not able to use 3rd-recovery tools like Rollectra to recovery your rootfs.

@@ -9,24 +9,36 @@ if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
       fi
 }
 
+if [ ! -f "/var/mobile/Library/Preferences/com.michael.TimeMachineLite.plist" ]; then
+      setrootsnnum=7
+else
+      setrootsnnum=`plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachineLite.plist`
+fi
+
+rootsnnum11=`expr $setrootsnnum + 1`
+rootsnnum10=$setrootsnnum
+linerootsnnumpy11=`expr $rootsnnum11 + 1`
+linerootsnnumpy10=`expr $rootsnnum10 + 1`
+linerootsnnumil11=$rootsnnum11
+linerootsnnumil10=$rootsnnum10
 
 dsnappy11_12rootfs() {
-line9=`snappy -f / -l | sed -n '9p'`
-if [ ! $line9 ]; then
+linemaxr=`snappy -f / -l | sed -n ${linerootsnnumpy11}p`
+if [ ! $linemaxr ]; then
       snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
       else
-      snapshotearliest=`snappy -f / -l | sed -n '3p' `
+      snapshotearliest=`snappy -f / -l | sed -n 3p`
       snappy -f / -d $snapshotearliest
       snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
       fi
 }
 
 dsnappy10rootfs() {
-line8=`snappy -f / -l | sed -n '8p'`
-if [ ! $line8 ]; then
+linemaxr=`snappy -f / -l | sed -n ${linerootsnnumpy10}p`
+if [ ! $linemaxr ]; then
       snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
       else
-      snapshotearliest=`snappy -f / -l | sed -n '2p' `
+      snapshotearliest=`snappy -f / -l | sed -n 2p`
       snappy -f / -d $snapshotearliest
       snappy -f / -c "com.apple.TimeMachine.`date +%F-%T`"
       fi
@@ -44,22 +56,22 @@ if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
 }
 
 dsnaputil11_12rootfs() {
-line8=`snapUtil -l / | sed -n '8p'`
-if [ ! $line8 ]; then
+linemaxr=`snapUtil -l / | sed -n ${linerootsnnumil11}p`
+if [ ! $linemaxr ]; then
       snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
       else
-      snapshotearliest=`snapUtil -l / | sed -n '2p' `
+      snapshotearliest=`snapUtil -l / | sed -n 2p`
       snapUtil -d $snapshotearliest /
       snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
       fi
 }
 
 dsnaputil10rootfs() {
-line7=`snapUtil -l / | sed -n '7p'`
-if [ ! $line7 ]; then
+linemaxr=`snapUtil -l / | sed -n ${linerootsnnumil10}p`
+if [ ! $linemaxr ]; then
       snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
       else
-      snapshotearliest=`snapUtil -l / | sed -n '1p' `
+      snapshotearliest=`snapUtil -l / | sed -n 1p`
       snapUtil -d $snapshotearliest /
       snapUtil -c "com.apple.TimeMachine.`date +%F-%T`" /
       fi
