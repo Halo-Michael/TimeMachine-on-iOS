@@ -1,11 +1,11 @@
 Package: com.michael.TimeMachineLite
-Version: 0.2.0
+Version: 0.2.1
 Section: Tweaks
 Name: TimeMachine on iOS Lite
 Author: halo_michael <yc992147156@me.com>
 Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
-Depends: com.bingner.snappy|io.okanon.snaputil, firmware (>= 10.3), firmware (<= 12.1.2)
+Depends: com.bingner.snappy|io.okanon.snaputil, com.bingner.plutil, coreutils, firmware (>= 10.3), firmware (<= 12.1.2)
 Replaces: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Conflicts: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Provides: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
