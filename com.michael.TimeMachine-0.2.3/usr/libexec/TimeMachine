@@ -150,4 +150,3 @@ if [[ $Version == 11.* ]] || [[ $Version == 12.* ]];then
 	dios10
 fi
 echo "TimeMachine on iOS's work is down, enjoy safety."
-
