@@ -1,5 +1,8 @@
 Now you can use "setTimeMachine(Lite)" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine(Lite)!
 
+Now you can use Snapback to restore a snapshot of the root/var fs
+You can get Snapback on midnightchips’s repo https://repo.midnightchips.me
+
 TimeMachine on iOS will creat snapshots at 2:00AM everyday to backup your system;
 Full version will create rootfs and datafs snapshots;
 Lite version will only create rootfs snapshots.

@@ -1,0 +1,8 @@
+Now you can use Snapback to restore a snapshot of the root/var fs
+You can get Snapback on midnightchips’s repo https://repo.midnightchips.me
+
+https://twitter.com/halo_michael/status/1117351994518147073?s=21
+
+Please only use Snapback to restore snapshots now!
+
+If a red text appears during the update and is alerted as a half-package package, this is normal, please force it to clean and reinstall the new version.
