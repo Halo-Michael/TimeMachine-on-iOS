@@ -1,0 +1,6 @@
+#!/bin/bash
+
+chown root:wheel /Library/LaunchDaemons/com.michael.TimeMachine.plist
+chown root:wheel /usr/libexec/TimeMachine
+chmod 0755 /usr/libexec/TimeMachine
+launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist
