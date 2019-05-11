@@ -1,0 +1,3 @@
+Make compatibility adjustment updates for the new Unc0ver.
+Details:
+The new Unc0ver will check the name of the oldest snapshot (usually the system raw snapshot) every time it is re-jailed. If the name is not "orig-fs" then rename it to "orig-fs"
