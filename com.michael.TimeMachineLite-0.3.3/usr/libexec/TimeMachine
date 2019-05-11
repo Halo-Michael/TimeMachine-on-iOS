@@ -84,7 +84,7 @@ if [ -f "/usr/bin/snappy" ];then
 	echo "iOS10 founded, skip orig snapshot check."
 	echo "Creating rootfs snapshot..."
 	dsnappy10rootfs
-	else
+else
 	echo "snapUtil founded"
 	echo "iOS10 founded, skip orig snapshot check."
 	echo "Creating rootfs snapshot..."
