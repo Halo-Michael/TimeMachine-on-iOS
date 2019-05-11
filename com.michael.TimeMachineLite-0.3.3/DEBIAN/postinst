@@ -6,3 +6,4 @@ chmod 0755 /usr/libexec/TimeMachine
 chown root:wheel /usr/bin/setTimeMachine
 chmod 0755 /usr/bin/setTimeMachine
 launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist
+exit 0

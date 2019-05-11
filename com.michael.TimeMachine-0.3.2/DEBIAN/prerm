@@ -1,3 +1,0 @@
-#!/bin/bash
-
-launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist

@@ -1,3 +1,25 @@
+dsnappycheck() {
+check_orig_fs=`snappy -f / -l | grep "^orig-fs$"`
+check_electra_prejailbreak=`snappy -f / -l | grep "^electra-prejailbreak$"`
+if [[ "$check_orig_fs" == "orig-fs" ]]; then
+	snappy -f / -r orig-fs --to com.apple.TimeMachine.orig-fs
+fi
+if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
+	snappy -f / -r electra-prejailbreak --to com.apple.TimeMachine.electra-prejailbreak
+fi
+}
+
+dsnaputilcheck() {
+check_orig_fs=`snapUtil -l / | grep "^orig-fs$"`
+check_electra_prejailbreak=`snapUtil -l / | grep "^electra-prejailbreak$"`
+if [[ "$check_orig_fs" == "orig-fs" ]]; then
+	snapUtil -n orig-fs com.apple.TimeMachine.orig-fs /
+fi
+if [[ "$check_electra_prejailbreak" == "electra-prejailbreak" ]]; then
+	snapUtil -n electra-prejailbreak com.apple.TimeMachine.electra-prejailbreak /
+fi
+}
+
 if [ ! -f "/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" ]; then
 	setrootsnnum=7
 else
@@ -91,10 +113,14 @@ dios10() {
 echo "iOS10 founded"
 if [ -f "/usr/bin/snappy" ];then
 	echo "snappy founded"
+	echo "iOS10 founded, skip orig snapshot check."
+	echo "Creating rootfs snapshot..."
 	dsnappy10rootfs
+	echo "Creating datafs snapshot..."
 	dsnappydatafs
-	else
+else
 	echo "snapUtil founded"
+	echo "iOS10 founded, skip orig snapshot check."
 	echo "Creating rootfs snapshot..."
 	dsnaputil10rootfs
 	echo "Creating datafs snapshot..."
@@ -106,12 +132,16 @@ dios11_12() {
 echo "iOS11 or iOS12 founded"
 if [ -f "/usr/bin/snappy" ];then
 	echo "snappy founded"
-	echo "Checking your orig shanshot..."
+	echo "iOS11 or iOS12 founded, now checking orig snapshot..."
+	dsnappycheck
+	echo "Creating rootfs snapshot..."
 	dsnappy11_12rootfs
+	echo "Creating datafs snapshot..."
 	dsnappydatafs
-	else
+else
 	echo "snapUtil founded"
-	echo "Checking your orig shanshot..."
+	echo "iOS11 or iOS12 founded, now checking orig snapshot..."
+	dsnaputilcheck
 	echo "Creating rootfs snapshot..."
 	dsnaputil11_12rootfs
 	echo "Creating datafs snapshot..."
