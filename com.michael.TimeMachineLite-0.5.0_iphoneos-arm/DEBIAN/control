@@ -1,0 +1,16 @@
+Package: com.michael.TimeMachineLite
+Version: 0.5.0
+Section: Tweaks
+Name: TimeMachine on iOS Lite
+Author: halo_michael <yc992147156@me.com>
+Sponsor: halo_michael <yc992147156@me.com>
+Maintainer: halo_michael <yc992147156@me.com>
+Depends: com.bingner.snappy|com.michael.snappy|io.okanon.snaputil, com.bingner.plutil, me.midnightchips.snapback, coreutils, firmware (>= 10.3), firmware (<= 12.3)
+Replaces: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
+Conflicts: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
+Provides: com.michael.TimeMachine, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
+Architecture: iphoneos-arm
+Description:  TimeMachine on iOS Lite will creat a rootfs snapshot at 2:00AM everyday;and delete the oldest snapshots when you have more than default 7(or other you set) snapshots.
+ Now you can use "setTimeMachine" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine!
+ Now you can use Snapback to restore a snapshot of the root/var fs
+ You can get Snapback on midnightchips’s repo https://repo.midnightchips.me

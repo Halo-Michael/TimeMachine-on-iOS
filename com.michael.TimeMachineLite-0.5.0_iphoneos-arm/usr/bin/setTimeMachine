@@ -1,0 +1,137 @@
+#!/bin/bash
+
+if [[ ! `id -u` == '0' ]];then
+	echo 'Run this as root!'
+	exit 1
+fi
+
+if [ -f "/usr/bin/snappy" ];then
+	tool=snappy
+elif [ -f "/usr/bin/snapUtil" ];then
+	tool=snapUtil
+else
+	echo "Unable to get the tool that depend on."
+	exit 1
+fi
+
+bash /etc/rc.d/snapshotcheck
+
+if [[ "${tool}" == 'snappy' ]];then
+	for rootfs_snapshot in `snappy -f / -l`
+	do
+		if [[ "$rootfs_snapshot" == com.apple.TimeMachine* && ! "$rootfs_snapshot" == 'com.apple.TimeMachine.orig-fs' && ! "$rootfs_snapshot" == 'com.apple.TimeMachine.electra-prejailbreak' ]];then
+			rootfs_snapshots=(${rootfs_snapshots[@]} ${rootfs_snapshot})
+		fi
+	done
+elif [[ "${tool}" == 'snapUtil' ]];then
+	for rootfs_snapshot in `snapUtil -l /`
+	do
+		if [[ "$rootfs_snapshot" == com.apple.TimeMachine* && ! "$rootfs_snapshot" == 'com.apple.TimeMachine.orig-fs' && ! "$rootfs_snapshot" == 'com.apple.TimeMachine.electra-prejailbreak' ]];then
+			rootfs_snapshots=(${rootfs_snapshots[@]} ${rootfs_snapshot})
+		fi
+	done
+fi
+
+echo "You are setting TimeMachine now! If you DO NOT KNOW WHAT ARE YOU DOING, please press any key except y to exit."
+sleep 2
+read -p "Are you really know you are setting TimeMachine?(y/n)" confirm
+if [[ "$confirm" == 'y' || "$confirm" == 'Y' ]];then
+	read -p "Enter 1 and return to select the number of snapshots you need to create for TimeMachine; enter 2 and return to restore the default settings for TimeMachine; enter any other characters and return or return directly to exit.(1/2/?)" choice
+	if [[ "$choice" == '1' ]];then
+		echo "Now setting TimeMachine."
+		read -p "Please set the maximum number of rootfs snapshot backups for TimeMachine:" max_rootfs_snapshot
+		read -p "Are you sure you want to backup up up at most ${max_rootfs_snapshot} snapshot for the rootfs?(y/n)" makesure
+		if [[ "$makesure" == 'y' || "$makesure" == 'Y' ]];then
+			if [ ! -f "/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" ];then
+				plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+			fi
+			plutil -key max_rootfs_snapshot -int ${max_rootfs_snapshot} /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+			echo "Successfully set TimeMachine to backup up up at most ${max_rootfs_snapshot} snapshot for rootfs, now delete the extra snapshot."
+			if [ "${#rootfs_snapshots[@]}" -gt "${max_rootfs_snapshot}" ];then
+				for i in $(seq `expr ${max_rootfs_snapshot} + 1` ${#rootfs_snapshots[@]})
+				do
+					if [[ "${tool}" == 'snappy' ]];then
+						snappy -f / -d ${rootfs_snapshots[0]}
+						check_snapshot=`snappy -f / -l | grep "^${rootfs_snapshots[0]}$"`
+						if [[ "${check_snapshot}" == "${rootfs_snapshots[0]}" ]];then
+							echo "Error: rootfs snapshot ${rootfs_snapshots[0]} delete failed."
+							exit 1
+						fi
+						echo "Successful deleted rootfs snapshot ${rootfs_snapshots[0]}."
+						unset rootfs_snapshots[0]
+						rootfs_snapshots=("${rootfs_snapshots[@]}")
+					elif [[ ${tool} == 'snapUtil' ]];then
+						snapUtil -d ${rootfs_snapshots[0]} /
+						check_snapshot=`snapUtil -l / | grep "^${rootfs_snapshots[0]}$"`
+						if [[ "${check_snapshot}" == "${rootfs_snapshots[0]}" ]];then
+							echo "Error: rootfs snapshot ${rootfs_snapshots[0]} delete failed."
+							exit 1
+						fi
+						echo "Successful deleted rootfs snapshot ${rootfs_snapshots[0]}."
+						unset rootfs_snapshots[0]
+						rootfs_snapshots=("${rootfs_snapshots[@]}")
+					fi
+				done
+			fi
+			echo "Successfully delete the extra snapshot."
+			echo "Now exit."
+			sleep 3
+			exit 0
+		elif [[ "$makesure" == 'n' || "$makesure" == 'N' ]];then
+			echo "Users chose to stop, now exit."
+			echo "Now exit."
+			sleep 2
+			exit 0
+		else
+			echo "You may have typed incorrectly. Please check your input carefully and try again."
+			echo "Now exit."
+			sleep 2
+			exit 1
+		fi
+	elif [[ "$choice" == '2' ]];then
+		rm -rf /var/mobile/Library/Preferences/com.michael.TimeMachine.plist
+		echo "TimeMachine has restored its default settings, now delete the extra snapshot."
+		if [ "${#rootfs_snapshots[@]}" -gt 7 ];then
+			for i in $(seq 8 ${#rootfs_snapshots[@]})
+			do
+				if [[ "${tool}" == 'snappy' ]];then
+					snappy -f / -d ${rootfs_snapshots[0]}
+					check_snapshot=`snappy -f / -l | grep "^${rootfs_snapshots[0]}$"`
+					if [[ "${check_snapshot}" == "${rootfs_snapshots[0]}" ]];then
+						echo "Error: rootfs snapshot ${rootfs_snapshots[0]} delete failed."
+						exit 1
+					fi
+					echo "Successful deleted rootfs snapshot ${rootfs_snapshots[0]}."
+					unset rootfs_snapshots[0]
+					rootfs_snapshots=("${rootfs_snapshots[@]}")
+				elif [[ "${tool}" == 'snapUtil' ]];then
+					snapUtil -d ${rootfs_snapshots[0]} /
+					check_snapshot=`snapUtil -l / | grep "^${rootfs_snapshots[0]}$"`
+					if [[ "${check_snapshot}" == "${rootfs_snapshots[0]}" ]];then
+						echo "Error: rootfs snapshot ${rootfs_snapshots[0]} delete failed."
+						exit 1
+					fi
+					echo "Successful deleted rootfs snapshot ${rootfs_snapshots[0]}."
+					unset rootfs_snapshots[0]
+					rootfs_snapshots=("${rootfs_snapshots[@]}")
+				fi
+			done
+		fi
+		echo "Successfully delete the extra snapshot."
+		echo "Now exit."
+		sleep 2
+		exit 0
+	else
+		echo "Now exit."
+		sleep 1
+		exit 0
+	fi
+elif [[ "$confirm" == 'n' || "$confirm" == 'N' ]];then
+	echo "Users chose to stop, now exit."
+	sleep 1
+	exit 0
+else
+	echo "Invalid parameters, you have no idea what are you doing! Now exit!"
+	sleep 2
+	exit 1
+fi
