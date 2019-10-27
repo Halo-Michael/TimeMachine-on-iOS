@@ -1,0 +1,3 @@
+Fully re-write TimeMachine-on-iOS again by using C-Language.
+You can use "setTimeMachine" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine.
+Usage:	setTimeMachine -f <vol> -n <num>

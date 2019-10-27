@@ -108,23 +108,24 @@ int main()
         printf("Wrong iOS version detected, now exit.\n");
         return 1;
     }
-    fp = fopen("/tmp/timemachine_upgrade","a+");
-    fprintf(fp, "#!/bin/bash\n");
-    fprintf(fp, "\n");
-    fprintf(fp, "if [ -f /var/mobile/Library/Preferences/com.michael.TimeMachine.plist ];then\n");
-    fprintf(fp, "\tif [[ `plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` ]];then\n");
-    fprintf(fp, "\t\tplutil -key max_rootfs_snapshot -int `plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` /var/mobile/Library/Preferences/com.michael.TimeMachine.plist\n");
-    fprintf(fp, "\t\tplutil -key setrootsnnum -remove /var/mobile/Library/Preferences/com.michael.TimeMachine.plist\n");
-    fprintf(fp, "\tfi\n");
-    fprintf(fp, "\tif [[ `plutil -key setdatasnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` ]];then\n");
-    fprintf(fp, "\t\tplutil -key max_datafs_snapshot -int `plutil -key setdatasnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` /var/mobile/Library/Preferences/com.michael.TimeMachine.plist\n");
-    fprintf(fp, "\t\tplutil -key setdatasnnum -remove /var/mobile/Library/Preferences/com.michael.TimeMachine.plist\n");
-    fprintf(fp, "\tfi\n");
-    fprintf(fp, "fi\n");
-    fprintf(fp, "\n");
-    fclose(fp);
-    run_cmd("chmod 0755 /tmp/timemachine_upgrade");
-    run_cmd("/tmp/timemachine_upgrade");
-    remove("/tmp/timemachine_upgrade");
+    if (! access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)){
+        run_cmd("plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine_upgrade");
+        int check;
+        FILE *fp = fopen("/tmp/timemachine_upgrade", "r");
+        if ((check = fgetc(fp)) != EOF){
+            run_cmd("plutil -key max_rootfs_snapshot -int `plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+            run_cmd("plutil -key setrootsnnum -remove /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+        }
+        fclose(fp);
+        remove("/tmp/timemachine_upgrade");
+        run_cmd("plutil -key setdatasnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine_upgrade");
+        fp = fopen("/tmp/timemachine_upgrade", "r");
+        if ((check = fgetc(fp)) != EOF){
+            run_cmd("plutil -key max_datafs_snapshot -int `plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist` /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+            run_cmd("plutil -key setrootsnnum -remove /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+        }
+        fclose(fp);
+        remove("/tmp/timemachine_upgrade");
+    }
     return 0;
 }
