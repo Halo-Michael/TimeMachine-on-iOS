@@ -97,6 +97,7 @@ int do_timemachine(const char *vol)
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)){
         max_snapshot = 7;
     } else {
+        int check;
         if (! access("/tmp/timemachine",0)){
             remove("/tmp/timemachine");
         }
@@ -106,7 +107,13 @@ int do_timemachine(const char *vol)
             run_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine");
         }
         FILE *fp = fopen("/tmp/timemachine", "r");
-        fscanf(fp, "%d", &max_snapshot);
+        if ((check = fgetc(fp)) != EOF){
+            fclose(fp);
+            fp = fopen("/tmp/timemachine", "r");
+            fscanf(fp, "%d", &max_snapshot);
+        } else {
+            max_snapshot = 7;
+        }
         fclose(fp);
         remove("/tmp/timemachine");
     }

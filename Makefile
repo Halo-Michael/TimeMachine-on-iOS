@@ -1,5 +1,5 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.6.1
+VERSION = 0.6.2
 
 .PHONY: all clean
 
@@ -21,26 +21,26 @@ all: clean postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
 	mv TimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
 	dpkg -b com.michael.TimeMachine-$(VERSION)_iphoneos-arm
 
-postinst:
+postinst: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything postinst.c -o postinst -framework IOKit -O2
 
-preinst:
+preinst: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything preinst.c -o preinst -framework IOKit -O2
 	ldid -Sentitlements.xml preinst
 
-prerm:
+prerm: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything prerm.c -o prerm -framework IOKit -O2
 	ldid -Sentitlements.xml prerm
 
-snapshotcheck:
+snapshotcheck: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything snapshotcheck.c -o snapshotcheck -framework IOKit -O2
 	ldid -Sentitlements.xml snapshotcheck
 
-setTimeMachine:
+setTimeMachine: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything setTimeMachine.c -o setTimeMachine -framework IOKit -O2
 	ldid -Sentitlements.xml setTimeMachine
 
-TimeMachine:
+TimeMachine: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything TimeMachine.c -o TimeMachine -framework IOKit -O2
 	ldid -Sentitlements.xml TimeMachine
 

@@ -24,7 +24,9 @@ int run_cmd(char *cmd)
 
 void usage()
 {
-    printf("Usage:\tsetTimeMachine -f <vol> -n <num>\n");
+    printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
+    printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
+    printf("\t-s\t\t\tShow current settings.\n");
     exit(2);
 }
 
@@ -194,8 +196,72 @@ int main(int argc, char **argv)
         printf("Run this as root!\n");
         exit(1);
     }
-    if (argc != 5 || strcmp(argv[1], "-f") != 0 || strcmp(argv[3], "-n") != 0 || do_check(argv[4]) != 0){
+    if (argc != 2){
+        if (argc != 5 || strcmp(argv[1], "-f") != 0 || strcmp(argv[3], "-n") != 0 || do_check(argv[4]) != 0){
+            usage();
+        }
+    } else if (strcmp(argv[1], "-s") != 0){
         usage();
+    }
+    if (strcmp(argv[1], "-s") == 0){
+        int max_rootfs_snapshot_printed = 0, max_datafs_snapshot_printed = 0;
+        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)){
+            printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
+            max_rootfs_snapshot_printed = 1;
+            printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
+            max_datafs_snapshot_printed = 1;
+        } else {
+            int check, max_rootfs_snapshot = 0, max_datafs_snapshot = 0;
+            if (! access("/tmp/rootfs_max_num",0)){
+                remove("/tmp/rootfs_max_num");
+            }
+            run_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/rootfs_max_num");
+            FILE *fp = fopen("/tmp/rootfs_max_num", "r");
+            if ((check = fgetc(fp)) != EOF){
+                fclose(fp);
+                fp = fopen("/tmp/rootfs_max_num", "r");
+                fscanf(fp, "%d", &max_rootfs_snapshot);
+            } else {
+                printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
+                max_rootfs_snapshot_printed = 1;
+            }
+            fclose(fp);
+            remove("/tmp/rootfs_max_num");
+            if (! access("/tmp/datafs_max_num",0)){
+                remove("/tmp/datafs_max_num");
+            }
+            run_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/datafs_max_num");
+            fp = fopen("/tmp/datafs_max_num", "r");
+            if ((check = fgetc(fp)) != EOF){
+                fclose(fp);
+                fp = fopen("/tmp/datafs_max_num", "r");
+                fscanf(fp, "%d", &max_datafs_snapshot);
+            } else {
+                printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
+                max_datafs_snapshot_printed = 1;
+            }
+            fclose(fp);
+            remove("/tmp/datafs_max_num");
+            if (max_rootfs_snapshot != 0){
+                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+                max_rootfs_snapshot_printed = 1;
+            } else {
+                if (max_rootfs_snapshot_printed == 0){
+                    printf("Won't save snapshot for rootfs\n");
+                    max_rootfs_snapshot_printed = 1;
+                }
+            }
+            if (max_datafs_snapshot != 0){
+                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+                max_datafs_snapshot_printed = 1;
+            } else {
+                if (max_datafs_snapshot_printed == 0){
+                    printf("Won't save snapshot for datafs\n");
+                    max_datafs_snapshot_printed = 1;
+                }
+            }
+        }
+        return 0;
     }
     char set[200];
     if (strcmp(argv[2], "/") == 0){
