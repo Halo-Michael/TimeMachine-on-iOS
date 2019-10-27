@@ -49,6 +49,9 @@ int main()
     run_cmd("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
     
     char c, version;
+    if (! access("/tmp/snapshotcheck",0)){
+        remove("/tmp/snapshotcheck");
+    }
     run_cmd("sw_vers -productVersion > /tmp/snapshotcheck");
     FILE *fp = fopen("/tmp/snapshotcheck", "r");
     fscanf(fp, "%c%c", &c, &version);

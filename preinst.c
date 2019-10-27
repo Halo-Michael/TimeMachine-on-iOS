@@ -109,6 +109,9 @@ int main()
         return 1;
     }
     if (! access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)){
+        if (! access("/tmp/timemachine_upgrade",0)){
+            remove("/tmp/timemachine_upgrade");
+        }
         run_cmd("plutil -key setrootsnnum /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine_upgrade");
         int check;
         FILE *fp = fopen("/tmp/timemachine_upgrade", "r");
