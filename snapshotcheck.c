@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <regex.h>
 #include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,16 +46,32 @@ int main()
         printf("Run this as root!\n");
         exit(1);
     }
-    char c, version;
+    char version[7];
     if (! access("/tmp/snapshotcheck",0)){
         remove("/tmp/snapshotcheck");
     }
     run_cmd("sw_vers -productVersion > /tmp/snapshotcheck");
     FILE *fp = fopen("/tmp/snapshotcheck", "r");
-    fscanf(fp, "%c%c", &c, &version);
+    fscanf(fp, "%s", &version);
     fclose(fp);
     remove("/tmp/snapshotcheck");
-    if (version == '1' || version == '2'){
+    int status_10, status_11, status_12, cflags = REG_EXTENDED;
+    regmatch_t pmatch[1];
+    const size_t nmatch = 1;
+    regex_t reg;
+    const char * pattern_10 = "^(10).+$";
+    const char * pattern_11 = "^(11).+$";
+    const char * pattern_12 = "^(12).+$";
+    regcomp(&reg, pattern_10, cflags);
+    status_10 = regexec(&reg, version, nmatch, pmatch, 0);
+    regfree(&reg);
+    regcomp(&reg, pattern_11, cflags);
+    status_11 = regexec(&reg, version, nmatch, pmatch, 0);
+    regfree(&reg);
+    regcomp(&reg, pattern_12, cflags);
+    status_12 = regexec(&reg, version, nmatch, pmatch, 0);
+    regfree(&reg);
+    if (status_11 == 0 || status_12 == 0){
         printf("iOS11 or iOS12 founded, now checking orig snapshot...\n");
         int dirfd = open("/", O_RDONLY, 0);
         if (dirfd < 0) {
@@ -105,7 +122,7 @@ int main()
             printf("Will rename snapshot \"electra-prejailbreak\" on fs / to \"com.apple.TimeMachine.electra-prejailbreak\"\n");
             do_rename("/", "electra-prejailbreak", "com.apple.TimeMachine.electra-prejailbreak");
         }
-    } else if (version == '0'){
+    } else if (status_10 == 0){
         printf("iOS10 founded, skip orig snapshot check.\n");
     } else {
         printf("Wrong iOS version detected, now exit.\n");

@@ -1,5 +1,5 @@
 Package: com.michael.TimeMachine
-Version: 0.6.2
+Version: 0.6.3
 Section: Tweaks
 Name: TimeMachine on iOS
 Author: halo_michael <yc992147156@me.com>
@@ -12,6 +12,8 @@ Provides: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios
 Architecture: iphoneos-arm
 Description:  TimeMachine on iOS will creat a rootfs snapshot and a datafs snapshot at 2:00AM everyday;and delete the oldest snapshots when you have more than default 7(or other you set) snapshots.
  You can use "setTimeMachine" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine.
- Usage:	setTimeMachine -f <vol> -n <num>
+ Usage:	setTimeMachine [OPTIONS...]
+ 	-f <vol> -n <num>	Set the max number of snapshots that need to be backed up for rootfs/datafs.
+ 	-s			Show current settings.
  If you want to restore a snapshot on datafs, please use Snapback.
  You can get Snapback on midnightchips’s repo: https://repo.midnightchips.me
