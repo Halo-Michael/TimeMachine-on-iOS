@@ -227,6 +227,15 @@ int main(int argc, char **argv)
             }
             fclose(fp);
             remove("/tmp/rootfs_max_num");
+            if (max_rootfs_snapshot != 0){
+                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+                max_rootfs_snapshot_printed = 1;
+            } else {
+                if (max_rootfs_snapshot_printed == 0){
+                    printf("Won't save snapshot for rootfs\n");
+                    max_rootfs_snapshot_printed = 1;
+                }
+            }
             if (! access("/tmp/datafs_max_num",0)){
                 remove("/tmp/datafs_max_num");
             }
@@ -242,15 +251,6 @@ int main(int argc, char **argv)
             }
             fclose(fp);
             remove("/tmp/datafs_max_num");
-            if (max_rootfs_snapshot != 0){
-                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
-                max_rootfs_snapshot_printed = 1;
-            } else {
-                if (max_rootfs_snapshot_printed == 0){
-                    printf("Won't save snapshot for rootfs\n");
-                    max_rootfs_snapshot_printed = 1;
-                }
-            }
             if (max_datafs_snapshot != 0){
                 printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
                 max_datafs_snapshot_printed = 1;
