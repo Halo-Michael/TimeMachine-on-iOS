@@ -39,7 +39,7 @@ int do_rename(const char *vol, const char *snap, const char *nw)
     return (ret);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     if (geteuid() != 0) {
         printf("Run this as root!\n");
@@ -47,6 +47,9 @@ int main()
     }
     
     run_cmd("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
+    if (strcmp(argv[1], "upgrade") == 0){
+        return 0;
+    }
     
     char c, version;
     if (! access("/tmp/snapshotcheck",0)){
