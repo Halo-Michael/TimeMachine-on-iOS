@@ -23,26 +23,27 @@ all: clean postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
 
 postinst: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything postinst.c -o postinst -framework IOKit -O2
+	ldid -Sentitlements.xml postinst
 
 preinst: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything preinst.c -o preinst -framework IOKit -O2
-	ldid -Sentitlements.xml preinst
+	ldid -Sentitlements-apfs.xml preinst
 
 prerm: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything prerm.c -o prerm -framework IOKit -O2
-	ldid -Sentitlements.xml prerm
+	ldid -Sentitlements-apfs.xml prerm
 
 snapshotcheck: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything snapshotcheck.c -o snapshotcheck -framework IOKit -O2
-	ldid -Sentitlements.xml snapshotcheck
+	ldid -Sentitlements-apfs.xml snapshotcheck
 
 setTimeMachine: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything setTimeMachine.c -o setTimeMachine -framework IOKit -O2
-	ldid -Sentitlements.xml setTimeMachine
+	ldid -Sentitlements-apfs.xml setTimeMachine
 
 TimeMachine: clean
 	xcrun -sdk iphoneos clang -arch arm64 -Weverything TimeMachine.c -o TimeMachine -framework IOKit -O2
-	ldid -Sentitlements.xml TimeMachine
+	ldid -Sentitlements-apfs.xml TimeMachine
 
 clean:
 	rm -rf com.michael.TimeMachine-*
