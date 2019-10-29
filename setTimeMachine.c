@@ -135,10 +135,11 @@ int do_timemachine(const char *vol)
             regmatch_t pmatch[1];
             const size_t nmatch = 1;
             regex_t reg;
-            char *pattern = "^(com.apple.TimeMachine).+$";
+            char *pattern = "^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$";
             regcomp(&reg, pattern, cflags);
             status = regexec(&reg, name, nmatch, pmatch, 0);
-            if (status == 0 && strcmp(name, "com.apple.TimeMachine.orig-fs") != 0 && strcmp(name, "com.apple.TimeMachine.electra-prejailbreak") != 0){
+            regfree(&reg);
+            if (status == 0){
                 FILE *fp = fopen("/tmp/snapshots","a+");
                 fprintf(fp, "%s", name);
                 fprintf(fp, "%s", "\n");
