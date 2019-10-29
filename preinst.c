@@ -14,8 +14,8 @@ int run_cmd(char *cmd)
     pid_t pid;
     char *argv[] = {"sh", "-c", cmd, NULL};
     int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
+    if (status == 0){
+        if (waitpid(pid, &status, 0) == -1){
             perror("waitpid");
         }
     }
@@ -25,7 +25,7 @@ int run_cmd(char *cmd)
 int do_rename(const char *vol, const char *snap, const char *nw)
 {
     int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
+    if (dirfd < 0){
         perror("open");
         exit(1);
     }
@@ -42,7 +42,7 @@ int do_rename(const char *vol, const char *snap, const char *nw)
 
 int main()
 {
-    if (geteuid() != 0) {
+    if (geteuid() != 0){
         printf("Run this as root!\n");
         exit(1);
     }
@@ -74,7 +74,7 @@ int main()
     if (status_11 == 0 || status_12 == 0){
         printf("iOS11 or iOS12 founded, now checking orig snapshot...\n");
         int dirfd = open("/", O_RDONLY, 0);
-        if (dirfd < 0) {
+        if (dirfd < 0){
             perror("open");
             exit(1);
         }
@@ -85,21 +85,21 @@ int main()
         alist.commonattr = ATTR_BULK_REQUIRED;
         
         int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
-        if (count < 0) {
+        if (count < 0){
             perror("fs_snapshot_list");
             exit(1);
         }
         
         char *p = &abuf[0];
         int has_orig_fs = 0, has_electra_prejailbreak = 0;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++){
             char *field = p;
             uint32_t len = *(uint32_t *)field;
             field += sizeof (uint32_t);
             attribute_set_t attrs = *(attribute_set_t *)field;
             field += sizeof (attribute_set_t);
             
-            if (attrs.commonattr & ATTR_CMN_NAME) {
+            if (attrs.commonattr & ATTR_CMN_NAME){
                 attrreference_t ar = *(attrreference_t *)field;
                 char *name = field + ar.attr_dataoffset;
                 field += sizeof (attrreference_t);

@@ -14,8 +14,8 @@ int run_cmd(char *cmd)
     pid_t pid;
     char *argv[] = {"sh", "-c", cmd, NULL};
     int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
+    if (status == 0){
+        if (waitpid(pid, &status, 0) == -1){
             perror("waitpid");
         }
     }
@@ -33,7 +33,7 @@ void usage()
 int do_delete(const char *vol, const char *snap)
 {
     int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
+    if (dirfd < 0){
         perror("open");
         exit(1);
     }
@@ -77,7 +77,7 @@ int do_timemachine(const char *vol)
     }
     
     int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
+    if (dirfd < 0){
         perror("open");
         exit(1);
     }
@@ -88,7 +88,7 @@ int do_timemachine(const char *vol)
     alist.commonattr = ATTR_BULK_REQUIRED;
     
     int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
-    if (count < 0) {
+    if (count < 0){
         perror("fs_snapshot_list");
         exit(1);
     }
@@ -119,7 +119,7 @@ int do_timemachine(const char *vol)
         FILE *fp = fopen("/tmp/snapshots","r+");
         fclose(fp);
     }
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++){
         char *field = p;
         uint32_t len = *(uint32_t *)field;
         field += sizeof (uint32_t);
@@ -153,9 +153,10 @@ int do_timemachine(const char *vol)
     int end, max_snapshot_num=0;
     if (!access("/tmp/snapshots",0)){
         FILE *fp = fopen("/tmp/snapshots", "r");
-        while((end = fgetc(fp)) != EOF)
-        {
-            if(end == '\n') max_snapshot_num++;
+        while((end = fgetc(fp)) != EOF){
+            if(end == '\n'){
+                max_snapshot_num++;
+            }
         }
         fclose(fp);
     }
@@ -173,13 +174,19 @@ int do_timemachine(const char *vol)
             int c;
             while (1) {
                 c = fgetc(fin);
-                if (EOF == c) break;
-                if ('\n' == c) break;
+                if (EOF == c){
+                    break;
+                }
+                if ('\n' == c){
+                    break;
+                }
             }
-            if (EOF != c )
-                while (1) {
+            if (EOF != c)
+                while (1){
                     c = fgetc(fin);
-                    if (EOF == c) break;
+                    if (EOF == c){
+                        break;
+                    }
                     fputc(c,fout);
                 }
             fclose(fin);
@@ -193,7 +200,7 @@ int do_timemachine(const char *vol)
 
 int main(int argc, char **argv)
 {
-    if (geteuid() != 0) {
+    if (geteuid() != 0){
         printf("Run this as root!\n");
         exit(1);
     }

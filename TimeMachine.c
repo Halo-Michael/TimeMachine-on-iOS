@@ -15,8 +15,8 @@ int run_cmd(char *cmd)
     pid_t pid;
     char *argv[] = {"sh", "-c", cmd, NULL};
     int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
+    if (status == 0){
+        if (waitpid(pid, &status, 0) == -1){
             perror("waitpid");
         }
     }
@@ -26,7 +26,7 @@ int run_cmd(char *cmd)
 int do_create(const char *vol, const char *snap)
 {
     int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
+    if (dirfd < 0){
         perror("open");
         exit(1);
     }
@@ -44,7 +44,7 @@ int do_create(const char *vol, const char *snap)
 int do_delete(const char *vol, const char *snap)
 {
     int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
+    if (dirfd < 0){
         perror("open");
         exit(1);
     }
@@ -65,34 +65,7 @@ int do_timemachine(const char *vol)
         perror("what?");
         return 1;
     }
-    time_t time_T;
-    time_T = time(NULL);
-    struct tm *tmTime;
-    tmTime = localtime(&time_T);
-    char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
-    char cre_snapshot[100];
-    strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
-    printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
-    do_create(vol, cre_snapshot);
     
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-    
-    struct attrlist alist = { 0 };
-    char abuf[2048];
-    
-    alist.commonattr = ATTR_BULK_REQUIRED;
-    
-    int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
-    if (count < 0) {
-        perror("fs_snapshot_list");
-        exit(1);
-    }
-    
-    char *p = &abuf[0];
     int max_snapshot = 0;
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)){
         max_snapshot = 7;
@@ -117,6 +90,36 @@ int do_timemachine(const char *vol)
         fclose(fp);
         remove("/tmp/timemachine");
     }
+    
+    if (max_snapshot != 0){
+        time_t time_T;
+        time_T = time(NULL);
+        struct tm *tmTime;
+        tmTime = localtime(&time_T);
+        char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
+        char cre_snapshot[100];
+        strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
+        printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
+        do_create(vol, cre_snapshot);
+    }
+    
+    int dirfd = open(vol, O_RDONLY, 0);
+    if (dirfd < 0){
+        perror("open");
+        exit(1);
+    }
+    
+    struct attrlist alist = { 0 };
+    char abuf[2048];
+    
+    alist.commonattr = ATTR_BULK_REQUIRED;
+    
+    int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
+    if (count < 0){
+        perror("fs_snapshot_list");
+        exit(1);
+    }
+    
     if (access("/tmp/snapshots",0)){
         FILE *fp = fopen("/tmp/snapshots","r+");
         fclose(fp);
@@ -125,14 +128,16 @@ int do_timemachine(const char *vol)
         FILE *fp = fopen("/tmp/snapshots","r+");
         fclose(fp);
     }
-    for (int i = 0; i < count; i++) {
+    
+    char *p = &abuf[0];
+    for (int i = 0; i < count; i++){
         char *field = p;
         uint32_t len = *(uint32_t *)field;
         field += sizeof (uint32_t);
         attribute_set_t attrs = *(attribute_set_t *)field;
         field += sizeof (attribute_set_t);
         
-        if (attrs.commonattr & ATTR_CMN_NAME) {
+        if (attrs.commonattr & ATTR_CMN_NAME){
             attrreference_t ar = *(attrreference_t *)field;
             char *name = field + ar.attr_dataoffset;
             field += sizeof (attrreference_t);
@@ -159,9 +164,10 @@ int do_timemachine(const char *vol)
     int end, max_snapshot_num=0;
     if (!access("/tmp/snapshots",0)){
         FILE *fp = fopen("/tmp/snapshots", "r");
-        while((end = fgetc(fp)) != EOF)
-        {
-            if(end == '\n') max_snapshot_num++;
+        while ((end = fgetc(fp)) != EOF){
+            if (end == '\n'){
+                max_snapshot_num++;
+            }
         }
         fclose(fp);
     }
@@ -179,13 +185,19 @@ int do_timemachine(const char *vol)
             int c;
             while (1) {
                 c = fgetc(fin);
-                if (EOF == c) break;
-                if ('\n' == c) break;
+                if (EOF == c){
+                    break;
+                }
+                if ('\n' == c){
+                    break;
+                }
             }
-            if (EOF != c )
-                while (1) {
+            if (EOF != c)
+                while (1){
                     c = fgetc(fin);
-                    if (EOF == c) break;
+                    if (EOF == c){
+                        break;
+                    }
                     fputc(c,fout);
                 }
             fclose(fin);
@@ -200,7 +212,7 @@ int do_timemachine(const char *vol)
 
 int main()
 {
-    if (geteuid() != 0) {
+    if (geteuid() != 0){
         printf("Run this as root!\n");
         exit(1);
     }
