@@ -1,5 +1,7 @@
 TARGET = TimeMachine-on-iOS
 VERSION = 0.6.6
+CC = xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=10.3
+LDID = ldid
 
 .PHONY: all clean
 
@@ -22,28 +24,34 @@ all: clean postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
 	dpkg -b com.michael.TimeMachine-$(VERSION)_iphoneos-arm
 
 postinst: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything postinst.c -o postinst -framework IOKit -O2
-	ldid -Sentitlements.xml postinst
+	$(CC) postinst.c -o postinst
+	strip postinst
+	$(LDID) -Sentitlements.xml postinst
 
 preinst: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything preinst.c -o preinst -framework IOKit -O2
-	ldid -Sentitlements-apfs.xml preinst
+	$(CC) preinst.c -o preinst
+	strip preinst
+	$(LDID) -Sentitlements-apfs.xml preinst
 
 prerm: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything prerm.c -o prerm -framework IOKit -O2
-	ldid -Sentitlements-apfs.xml prerm
+	$(CC) prerm.c -o prerm
+	strip prerm
+	$(LDID) -Sentitlements-apfs.xml prerm
 
 snapshotcheck: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything snapshotcheck.c -o snapshotcheck -framework IOKit -O2
-	ldid -Sentitlements-apfs.xml snapshotcheck
+	$(CC) snapshotcheck.c -o snapshotcheck
+	strip snapshotcheck
+	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
 setTimeMachine: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything setTimeMachine.c -o setTimeMachine -framework IOKit -O2
-	ldid -Sentitlements-apfs.xml setTimeMachine
+	$(CC) setTimeMachine.c -o setTimeMachine
+	strip setTimeMachine
+	$(LDID) -Sentitlements-apfs.xml setTimeMachine
 
 TimeMachine: clean
-	xcrun -sdk iphoneos clang -arch arm64 -Weverything TimeMachine.c -o TimeMachine -framework IOKit -O2
-	ldid -Sentitlements-apfs.xml TimeMachine
+	$(CC) TimeMachine.c -o TimeMachine
+	strip TimeMachine
+	$(LDID) -Sentitlements-apfs.xml TimeMachine
 
 clean:
 	rm -rf com.michael.TimeMachine-*
