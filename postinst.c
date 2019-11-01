@@ -9,8 +9,8 @@ int run_cmd(char *cmd)
     pid_t pid;
     char *argv[] = {"sh", "-c", cmd, NULL};
     int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0){
-        if (waitpid(pid, &status, 0) == -1){
+    if (status == 0) {
+        if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");
         }
     }
@@ -19,7 +19,7 @@ int run_cmd(char *cmd)
 
 int main()
 {
-    if (geteuid() != 0){
+    if (geteuid() != 0) {
         printf("Run this as root!\n");
         exit(1);
     }
