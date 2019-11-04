@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <regex.h>
 #include <spawn.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -91,7 +92,7 @@ int main()
         }
         
         char *p = &abuf[0];
-        int has_orig_fs = 0, has_electra_prejailbreak = 0;
+        bool has_orig_fs = 0, has_electra_prejailbreak = 0;
         for (int i = 0; i < count; i++) {
             char *field = p;
             uint32_t len = *(uint32_t *)field;
