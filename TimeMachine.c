@@ -176,7 +176,7 @@ int do_timemachine(const char *vol)
         for (max_snapshot_num; max_snapshot_num > max_snapshot; max_snapshot_num--) {
             char del_snapshot[41];
             FILE *fp = fopen("/tmp/snapshots", "r");
-            fscanf(fp, "%s\n", &del_snapshot);
+            fscanf(fp, "%s\n", del_snapshot);
             fclose(fp);
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", del_snapshot, vol);
             do_delete(vol, del_snapshot);

@@ -53,7 +53,7 @@ int main()
     }
     run_cmd("sw_vers -productVersion > /tmp/snapshotcheck");
     FILE *fp = fopen("/tmp/snapshotcheck", "r");
-    fscanf(fp, "%s", &version);
+    fscanf(fp, "%s", version);
     fclose(fp);
     remove("/tmp/snapshotcheck");
     int status_10, status_11, status_12, cflags = REG_EXTENDED;

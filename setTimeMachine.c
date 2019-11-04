@@ -25,6 +25,7 @@ int run_cmd(char *cmd)
 void usage()
 {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
+    printf("\t-h\t\t\tPrint this help.\n");
     printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
     printf("\t-s\t\t\tShow current settings.\n");
     exit(2);
@@ -53,7 +54,7 @@ int do_check(const char *num)
     if (strcmp(num, "0") == 0) {
         return 0;
     }
-    char* p = num;
+    const char* p = num;
     if (*p < '1' || *p > '9') {
         return 1;
     } else {
@@ -165,7 +166,7 @@ int do_timemachine(const char *vol)
         for (max_snapshot_num; max_snapshot_num > max_snapshot; max_snapshot_num--) {
             char del_snapshot[41];
             FILE *fp = fopen("/tmp/snapshots", "r");
-            fscanf(fp, "%s\n", &del_snapshot);
+            fscanf(fp, "%s\n", del_snapshot);
             fclose(fp);
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", del_snapshot, vol);
             do_delete(vol, del_snapshot);
