@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <regex.h>
 #include <spawn.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
         return 0;
     }
     
-    char c, version;
+    char version[7];
     if (! access("/tmp/snapshotcheck",0)) {
         remove("/tmp/snapshotcheck");
     }
@@ -70,16 +71,16 @@ int main(int argc, char **argv)
     const char * pattern_12 = "^(12).+$";
     const char * pattern_13 = "^(13).+$";
     regcomp(&reg, pattern_10, cflags);
-    status_10 = regexec(&reg, version, nmatch, pmatch, 0);
+    status_10 = regexec(&reg, &version, nmatch, pmatch, 0);
     regfree(&reg);
     regcomp(&reg, pattern_11, cflags);
-    status_11 = regexec(&reg, version, nmatch, pmatch, 0);
+    status_11 = regexec(&reg, &version, nmatch, pmatch, 0);
     regfree(&reg);
     regcomp(&reg, pattern_12, cflags);
-    status_12 = regexec(&reg, version, nmatch, pmatch, 0);
+    status_12 = regexec(&reg, &version, nmatch, pmatch, 0);
     regfree(&reg);
     regcomp(&reg, pattern_13, cflags);
-    status_13 = regexec(&reg, version, nmatch, pmatch, 0);
+    status_13 = regexec(&reg, &version, nmatch, pmatch, 0);
     regfree(&reg);
     if (status_11 == 0 || status_12 == 0 || status_13 == 0) {
         printf("iOS11, iOS12 or iOS13 founded, now checking orig snapshot...\n");

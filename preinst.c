@@ -56,13 +56,14 @@ int main()
     fscanf(fp, "%s", version);
     fclose(fp);
     remove("/tmp/snapshotcheck");
-    int status_10, status_11, status_12, cflags = REG_EXTENDED;
+    int status_10, status_11, status_12, status_13, cflags = REG_EXTENDED;
     regmatch_t pmatch[1];
     const size_t nmatch = 1;
     regex_t reg;
     const char * pattern_10 = "^(10).+$";
     const char * pattern_11 = "^(11).+$";
     const char * pattern_12 = "^(12).+$";
+    const char * pattern_13 = "^(13).+$";
     regcomp(&reg, pattern_10, cflags);
     status_10 = regexec(&reg, version, nmatch, pmatch, 0);
     regfree(&reg);
@@ -72,8 +73,11 @@ int main()
     regcomp(&reg, pattern_12, cflags);
     status_12 = regexec(&reg, version, nmatch, pmatch, 0);
     regfree(&reg);
-    if (status_11 == 0 || status_12 == 0) {
-        printf("iOS11 or iOS12 founded, now checking orig snapshot...\n");
+    regcomp(&reg, pattern_13, cflags);
+    status_13 = regexec(&reg, &version, nmatch, pmatch, 0);
+    regfree(&reg);
+    if (status_11 == 0 || status_12 == 0 || status_13 == 0) {
+        printf("iOS11, iOS12 or iOS13 founded, now checking orig snapshot...\n");
         int dirfd = open("/", O_RDONLY, 0);
         if (dirfd < 0) {
             perror("open");
