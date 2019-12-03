@@ -90,7 +90,7 @@ int do_timemachine(const char *vol)
         if (strcmp(vol, "/") == 0) {
             read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
         }
-        if (strcmp(vol, "/var") == 0 || strcmp(vol, "/var/") == 0) {
+        if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
             read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
         }
         if (strlen(buffer) != 0) {
