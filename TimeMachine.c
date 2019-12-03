@@ -23,6 +23,22 @@ int run_cmd(char *cmd)
     return status;
 }
 
+int read_cmd(char* cmd, char* result)
+{
+    char buffer[10240];
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) {
+        return -1;
+    }
+    while (!feof(pipe)) {
+        if (fgets(buffer, 4096, pipe)) {
+            strcat(result, buffer);
+        }
+    }
+    pclose(pipe);
+    return 0;
+}
+
 int do_create(const char *vol, const char *snap)
 {
     int dirfd = open(vol, O_RDONLY, 0);
@@ -67,28 +83,21 @@ int do_timemachine(const char *vol)
     }
     
     int max_snapshot = 0;
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)) {
+    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
         max_snapshot = 7;
     } else {
-        int check;
-        if (! access("/tmp/timemachine",0)) {
-            remove("/tmp/timemachine");
-        }
+        char buffer[1024] = "";
         if (strcmp(vol, "/") == 0) {
-            run_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine");
-        } else {
-            run_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine");
+            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
         }
-        FILE *fp = fopen("/tmp/timemachine", "r");
-        if ((check = fgetc(fp)) != EOF) {
-            fclose(fp);
-            fp = fopen("/tmp/timemachine", "r");
-            fscanf(fp, "%d", &max_snapshot);
+        if (strcmp(vol, "/var") == 0 || strcmp(vol, "/var/") == 0) {
+            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
+        }
+        if (strlen(buffer) != 0) {
+            max_snapshot = atoi(buffer);
         } else {
             max_snapshot = 7;
         }
-        fclose(fp);
-        remove("/tmp/timemachine");
     }
     
     if (max_snapshot != 0) {
@@ -120,7 +129,7 @@ int do_timemachine(const char *vol)
         exit(1);
     }
     
-    if (access("/tmp/snapshots",0)) {
+    if (access("/tmp/snapshots", F_OK) != 0) {
         FILE *fp = fopen("/tmp/snapshots","r+");
         fclose(fp);
     } else {
@@ -162,7 +171,7 @@ int do_timemachine(const char *vol)
     }
     
     int end, max_snapshot_num=0;
-    if (!access("/tmp/snapshots",0)) {
+    if (access("/tmp/snapshots", F_OK) == 0) {
         FILE *fp = fopen("/tmp/snapshots", "r");
         while ((end = fgetc(fp)) != EOF) {
             if (end == '\n') {

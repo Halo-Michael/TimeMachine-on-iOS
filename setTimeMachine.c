@@ -22,6 +22,22 @@ int run_cmd(char *cmd)
     return status;
 }
 
+int read_cmd(char* cmd, char* result)
+{
+    char buffer[10240];
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) {
+        return -1;
+    }
+    while (!feof(pipe)) {
+        if (fgets(buffer, 4096, pipe)) {
+            strcat(result, buffer);
+        }
+    }
+    pclose(pipe);
+    return 0;
+}
+
 void usage()
 {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
@@ -96,23 +112,21 @@ int do_timemachine(const char *vol)
     
     char *p = &abuf[0];
     int max_snapshot = 0;
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)) {
+    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
         max_snapshot = 7;
     } else {
-        if (! access("/tmp/timemachine",0)) {
-            remove("/tmp/timemachine");
-        }
         if (strcmp(vol, "/") == 0) {
-            run_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine");
-        } else {
-            run_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/timemachine");
+            char buffer[1024] = "";
+            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
+            max_snapshot = atoi(buffer);
         }
-        FILE *fp = fopen("/tmp/timemachine", "r");
-        fscanf(fp, "%d", &max_snapshot);
-        fclose(fp);
-        remove("/tmp/timemachine");
+        if (strcmp(vol, "/var") == 0 || strcmp(vol, "/var/") == 0) {
+            char buffer[1024] = "";
+            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
+            max_snapshot = atoi(buffer);
+        }
     }
-    if (access("/tmp/snapshots",0)) {
+    if (access("/tmp/snapshots", F_OK) != 0) {
         FILE *fp = fopen("/tmp/snapshots","r+");
         fclose(fp);
     } else {
@@ -152,7 +166,7 @@ int do_timemachine(const char *vol)
     }
     
     int end, max_snapshot_num=0;
-    if (!access("/tmp/snapshots",0)) {
+    if (access("/tmp/snapshots", F_OK) == 0) {
         FILE *fp = fopen("/tmp/snapshots", "r");
         while((end = fgetc(fp)) != EOF) {
             if(end == '\n') {
@@ -214,28 +228,21 @@ int main(int argc, char **argv)
     }
     if (strcmp(argv[1], "-s") == 0) {
         int max_rootfs_snapshot_printed = 0, max_datafs_snapshot_printed = 0;
-        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)) {
+        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
             printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
             max_rootfs_snapshot_printed = 1;
             printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
             max_datafs_snapshot_printed = 1;
         } else {
-            int check, max_rootfs_snapshot = 0, max_datafs_snapshot = 0;
-            if (! access("/tmp/rootfs_max_num",0)) {
-                remove("/tmp/rootfs_max_num");
-            }
-            run_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/rootfs_max_num");
-            FILE *fp = fopen("/tmp/rootfs_max_num", "r");
-            if ((check = fgetc(fp)) != EOF) {
-                fclose(fp);
-                fp = fopen("/tmp/rootfs_max_num", "r");
-                fscanf(fp, "%d", &max_rootfs_snapshot);
+            int max_rootfs_snapshot = 0, max_datafs_snapshot = 0;
+            char buffer[1024] = "";
+            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
+            if (strlen(buffer) != 0) {
+                max_rootfs_snapshot = atoi(buffer);
             } else {
                 printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
                 max_rootfs_snapshot_printed = 1;
             }
-            fclose(fp);
-            remove("/tmp/rootfs_max_num");
             if (max_rootfs_snapshot != 0) {
                 printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
                 max_rootfs_snapshot_printed = 1;
@@ -245,21 +252,14 @@ int main(int argc, char **argv)
                     max_rootfs_snapshot_printed = 1;
                 }
             }
-            if (! access("/tmp/datafs_max_num",0)) {
-                remove("/tmp/datafs_max_num");
-            }
-            run_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist > /tmp/datafs_max_num");
-            fp = fopen("/tmp/datafs_max_num", "r");
-            if ((check = fgetc(fp)) != EOF) {
-                fclose(fp);
-                fp = fopen("/tmp/datafs_max_num", "r");
-                fscanf(fp, "%d", &max_datafs_snapshot);
+            char buffer2[1024] = "";
+            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer2);
+            if (strlen(buffer2) != 0) {
+                max_datafs_snapshot = atoi(buffer2);
             } else {
                 printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
                 max_datafs_snapshot_printed = 1;
             }
-            fclose(fp);
-            remove("/tmp/datafs_max_num");
             if (max_datafs_snapshot != 0) {
                 printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
                 max_datafs_snapshot_printed = 1;
@@ -273,10 +273,10 @@ int main(int argc, char **argv)
         return 0;
     }
     char set[200];
+    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
+        run_cmd("plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+    }
     if (strcmp(argv[2], "/") == 0) {
-        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)) {
-            run_cmd("plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-        }
         sprintf(set, "plutil -key max_rootfs_snapshot -int %s /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", argv[4]);
         run_cmd(set);
         printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", argv[4]);
@@ -284,9 +284,6 @@ int main(int argc, char **argv)
         printf("Successfully delete the extra snapshot.\n");
         printf("Now exit.\n");
     } else if (strcmp(argv[2], "/var") == 0 || strcmp(argv[2], "/var/") == 0 || strcmp(argv[2], "/private/var") == 0 || strcmp(argv[2], "/private/var/") == 0) {
-        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist",0)) {
-            run_cmd("plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-        }
         sprintf(set, "plutil -key max_datafs_snapshot -int %s /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", argv[4]);
         run_cmd(set);
         printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", argv[4]);

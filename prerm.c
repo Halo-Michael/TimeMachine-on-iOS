@@ -23,6 +23,22 @@ int run_cmd(char *cmd)
     return status;
 }
 
+int read_cmd(char* cmd, char* result)
+{
+    char buffer[10240];
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) {
+        return -1;
+    }
+    while (!feof(pipe)) {
+        if (fgets(buffer, 4096, pipe)) {
+            strcat(result, buffer);
+        }
+    }
+    pclose(pipe);
+    return 0;
+}
+
 int do_rename(const char *vol, const char *snap, const char *nw)
 {
     int dirfd = open(vol, O_RDONLY, 0);
@@ -53,15 +69,8 @@ int main(int argc, char **argv)
         return 0;
     }
     
-    char version[7];
-    if (! access("/tmp/snapshotcheck",0)) {
-        remove("/tmp/snapshotcheck");
-    }
-    run_cmd("sw_vers -productVersion > /tmp/snapshotcheck");
-    FILE *fp = fopen("/tmp/snapshotcheck", "r");
-    fscanf(fp, "%s", version);
-    fclose(fp);
-    remove("/tmp/snapshotcheck");
+    char version[16] = "";
+    read_cmd("sw_vers -productVersion", version);
     int status_10, status_11, status_12, status_13, cflags = REG_EXTENDED;
     regmatch_t pmatch[1];
     const size_t nmatch = 1;
