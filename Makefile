@@ -1,5 +1,5 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.7.1
+VERSION = 0.7.2
 CC = xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=10.3
 LDID = ldid
 
@@ -29,17 +29,17 @@ postinst: clean
 	$(LDID) -Sentitlements.xml postinst
 
 preinst: clean
-	$(CC) preinst.c -o preinst
+	$(CC) preinst.c -o preinst -framework CoreFoundation
 	strip preinst
 	$(LDID) -Sentitlements-apfs.xml preinst
 
 prerm: clean
-	$(CC) prerm.c -o prerm
+	$(CC) prerm.c -o prerm -framework CoreFoundation
 	strip prerm
 	$(LDID) -Sentitlements-apfs.xml prerm
 
 snapshotcheck: clean
-	$(CC) snapshotcheck.c -o snapshotcheck
+	$(CC) snapshotcheck.c -o snapshotcheck -framework CoreFoundation
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 

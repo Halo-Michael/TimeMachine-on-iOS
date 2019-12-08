@@ -211,6 +211,7 @@ int do_timemachine(const char *vol)
         }
     }
     remove("/tmp/snapshots");
+    return 0;
 }
 
 int main(int argc, char **argv)

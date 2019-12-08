@@ -1,13 +1,23 @@
-#include <fcntl.h>
-#include <regex.h>
+#include <CoreFoundation/CoreFoundation.h>
+//#include <fcntl.h>
+//#include <regex.h>
 #include <spawn.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stdbool.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
 #include <sys/snapshot.h>
-#include <sys/uio.h>
-#include <unistd.h>
+//#include <sys/uio.h>
+//#include <unistd.h>
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_10_3
+#   define kCFCoreFoundationVersionNumber_iOS_10_3 1349.56
+#endif
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_11_0
+#   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
+#endif
+
 extern char **environ;
 
 int run_cmd(char *cmd)
@@ -64,30 +74,8 @@ int main()
         exit(1);
     }
     
-    char version[16] = "";
-    read_cmd("sw_vers -productVersion", version);
-    int status_10, status_11, status_12, status_13, cflags = REG_EXTENDED;
-    regmatch_t pmatch[1];
-    const size_t nmatch = 1;
-    regex_t reg;
-    const char * pattern_10 = "^(10).+$";
-    const char * pattern_11 = "^(11).+$";
-    const char * pattern_12 = "^(12).+$";
-    const char * pattern_13 = "^(13).+$";
-    regcomp(&reg, pattern_10, cflags);
-    status_10 = regexec(&reg, version, nmatch, pmatch, 0);
-    regfree(&reg);
-    regcomp(&reg, pattern_11, cflags);
-    status_11 = regexec(&reg, version, nmatch, pmatch, 0);
-    regfree(&reg);
-    regcomp(&reg, pattern_12, cflags);
-    status_12 = regexec(&reg, version, nmatch, pmatch, 0);
-    regfree(&reg);
-    regcomp(&reg, pattern_13, cflags);
-    status_13 = regexec(&reg, &version, nmatch, pmatch, 0);
-    regfree(&reg);
-    if (status_11 == 0 || status_12 == 0 || status_13 == 0) {
-        printf("iOS11, iOS12 or iOS13 founded, now checking orig snapshot...\n");
+    if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_11_0) {
+        printf("iOS11 or higher version detected, now checking orig snapshot...\n");
         int dirfd = open("/", O_RDONLY, 0);
         if (dirfd < 0) {
             perror("open");
@@ -137,8 +125,8 @@ int main()
             printf("Will rename snapshot \"electra-prejailbreak\" on fs / to \"com.apple.TimeMachine.electra-prejailbreak\"\n");
             do_rename("/", "electra-prejailbreak", "com.apple.TimeMachine.electra-prejailbreak");
         }
-    } else if (status_10 == 0) {
-        printf("iOS10 founded, skip orig snapshot check.\n");
+    } else if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_10_3) {
+        printf("iOS10 detected, skip orig snapshot check.\n");
     } else {
         printf("Wrong iOS version detected, now exit.\n");
         return 1;

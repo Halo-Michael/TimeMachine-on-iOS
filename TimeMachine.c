@@ -216,6 +216,7 @@ int do_timemachine(const char *vol)
         }
     }
     remove("/tmp/snapshots");
+    return 0;
 }
 
 
@@ -229,5 +230,6 @@ int main()
     do_timemachine("/");
     do_timemachine("/private/var");
     printf("TimeMachine on iOS's work is down, enjoy safety.\n");
+    printf("\n");
     return 0;
 }
