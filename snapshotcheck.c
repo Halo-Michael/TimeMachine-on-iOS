@@ -25,22 +25,6 @@ int run_cmd(char *cmd)
     return status;
 }
 
-int read_cmd(char* cmd, char* result)
-{
-    char buffer[10240];
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe) {
-        return -1;
-    }
-    while (!feof(pipe)) {
-        if (fgets(buffer, 4096, pipe)) {
-            strcat(result, buffer);
-        }
-    }
-    pclose(pipe);
-    return 0;
-}
-
 int do_rename(const char *vol, const char *snap, const char *nw)
 {
     int dirfd = open(vol, O_RDONLY, 0);
