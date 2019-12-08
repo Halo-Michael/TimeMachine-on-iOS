@@ -1,14 +1,6 @@
 #include <CoreFoundation/CoreFoundation.h>
-//#include <fcntl.h>
-//#include <regex.h>
 #include <spawn.h>
-//#include <stdbool.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include <sys/snapshot.h>
-//#include <sys/uio.h>
-//#include <unistd.h>
 
 #ifndef kCFCoreFoundationVersionNumber_iOS_10_3
 #   define kCFCoreFoundationVersionNumber_iOS_10_3 1349.56
