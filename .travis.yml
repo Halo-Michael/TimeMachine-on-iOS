@@ -1,0 +1,12 @@
+# https://travis-ci.org
+
+language: c
+os: osx
+osx_image: xcode11.3
+
+before_install:
+  - brew update
+  - brew install ldid dpkg
+
+script:
+  - make all
