@@ -1,6 +1,6 @@
 # https://travis-ci.org
 
-sudo: required
+sudo: true
 language: objective-c
 os: osx
 osx_image: xcode11.3
