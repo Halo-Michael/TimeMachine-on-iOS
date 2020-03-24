@@ -1,41 +1,30 @@
-#include <fcntl.h>
 #include <regex.h>
-#include <spawn.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/snapshot.h>
-#include <sys/uio.h>
-#include <unistd.h>
-extern char **environ;
 
-int run_cmd(char *cmd)
-{
-    pid_t pid;
-    char *argv[] = {"sh", "-c", cmd, NULL};
-    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("waitpid");
+bool modifyPlist(NSString *filename, void (^function)(id)) {
+    NSData *data = [NSData dataWithContentsOfFile:filename];
+    if (data == nil) {
+        return false;
+    }
+    NSPropertyListFormat format = 0;
+    NSError *error = nil;
+    id plist = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainersAndLeaves format:&format error:&error];
+    if (plist == nil) {
+        return false;
+    }
+    if (function) {
+        function(plist);
+    }
+    NSData *newData = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:&error];
+    if (newData == nil) {
+        return false;
+    }
+    if (![data isEqual:newData]) {
+        if (![newData writeToFile:filename atomically:YES]) {
+            return false;
         }
     }
-    return status;
-}
-
-int read_cmd(char* cmd, char* result)
-{
-    char buffer[10240];
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe) {
-        return -1;
-    }
-    while (!feof(pipe)) {
-        if (fgets(buffer, 4096, pipe)) {
-            strcat(result, buffer);
-        }
-    }
-    pclose(pipe);
-    return 0;
+    return true;
 }
 
 void usage()
@@ -88,6 +77,8 @@ int do_check(const char *num)
 
 int do_timemachine(const char *vol)
 {
+    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
         perror("what?");
         return 1;
@@ -116,24 +107,14 @@ int do_timemachine(const char *vol)
         max_snapshot = 7;
     } else {
         if (strcmp(vol, "/") == 0) {
-            char buffer[1024] = "";
-            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
-            max_snapshot = atoi(buffer);
+            max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
         }
         if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
-            char buffer[1024] = "";
-            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
-            max_snapshot = atoi(buffer);
+            max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
         }
     }
-    if (access("/tmp/snapshots", F_OK) != 0) {
-        FILE *fp = fopen("/tmp/snapshots","r+");
-        fclose(fp);
-    } else {
-        remove("/tmp/snapshots");
-        FILE *fp = fopen("/tmp/snapshots","r+");
-        fclose(fp);
-    }
+
+    NSMutableArray *snapshots = [NSMutableArray array];
     for (int i = 0; i < count; i++) {
         char *field = p;
         uint32_t len = *(uint32_t *)field;
@@ -155,62 +136,20 @@ int do_timemachine(const char *vol)
             status = regexec(&reg, name, nmatch, pmatch, 0);
             regfree(&reg);
             if (status == 0) {
-                FILE *fp = fopen("/tmp/snapshots","a+");
-                fprintf(fp, "%s", name);
-                fprintf(fp, "%s", "\n");
-                fclose(fp);
+                [snapshots addObject:[NSString stringWithFormat:@"%s", name]];
             }
         }
         
         p += len;
     }
     
-    int end, max_snapshot_num=0;
-    if (access("/tmp/snapshots", F_OK) == 0) {
-        FILE *fp = fopen("/tmp/snapshots", "r");
-        while((end = fgetc(fp)) != EOF) {
-            if(end == '\n') {
-                max_snapshot_num++;
-            }
-        }
-        fclose(fp);
-    }
-    
-    if (max_snapshot_num > max_snapshot) {
-        for (max_snapshot_num; max_snapshot_num > max_snapshot; max_snapshot_num--) {
-            char del_snapshot[41];
-            FILE *fp = fopen("/tmp/snapshots", "r");
-            fscanf(fp, "%s\n", del_snapshot);
-            fclose(fp);
-            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", del_snapshot, vol);
-            do_delete(vol, del_snapshot);
-            
-            FILE *fin = fopen("/tmp/snapshots", "r"), *fout = fopen("/tmp/snapshots.tmp", "w");
-            int c;
-            while (1) {
-                c = fgetc(fin);
-                if (EOF == c) {
-                    break;
-                }
-                if ('\n' == c) {
-                    break;
-                }
-            }
-            if (EOF != c)
-                while (1) {
-                    c = fgetc(fin);
-                    if (EOF == c) {
-                        break;
-                    }
-                    fputc(c,fout);
-                }
-            fclose(fin);
-            fclose(fout);
-            remove("/tmp/snapshots");
-            rename("/tmp/snapshots.tmp", "/tmp/snapshots");
+    if ([snapshots count] > max_snapshot) {
+        while ([snapshots count] > max_snapshot) {
+            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
+            do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+            [snapshots removeObjectAtIndex:0];
         }
     }
-    remove("/tmp/snapshots");
     return 0;
 }
 
@@ -227,6 +166,8 @@ int main(int argc, char **argv)
     } else if (strcmp(argv[1], "-s") != 0) {
         usage();
     }
+    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(argv[1], "-s") == 0) {
         int max_rootfs_snapshot_printed = 0, max_datafs_snapshot_printed = 0;
         if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
@@ -236,10 +177,8 @@ int main(int argc, char **argv)
             max_datafs_snapshot_printed = 1;
         } else {
             int max_rootfs_snapshot = 0, max_datafs_snapshot = 0;
-            char buffer[1024] = "";
-            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
-            if (strlen(buffer) != 0) {
-                max_rootfs_snapshot = atoi(buffer);
+            if (![[settings objectForKey:@"max_rootfs_snapshot"] isEqual:[NSNull null]]) {
+                max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
             } else {
                 printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
                 max_rootfs_snapshot_printed = 1;
@@ -253,10 +192,8 @@ int main(int argc, char **argv)
                     max_rootfs_snapshot_printed = 1;
                 }
             }
-            char buffer2[1024] = "";
-            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer2);
-            if (strlen(buffer2) != 0) {
-                max_datafs_snapshot = atoi(buffer2);
+            if (![[settings objectForKey:@"max_datafs_snapshot"] isEqual:[NSNull null]]) {
+                max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
             } else {
                 printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
                 max_datafs_snapshot_printed = 1;
@@ -273,20 +210,26 @@ int main(int argc, char **argv)
         }
         return 0;
     }
-    char set[200];
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-        run_cmd("plutil -create /var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+        FILE *fp = fopen("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist","a+");
+        fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+        fprintf(fp, "<plist version=\"1.0\">\n");
+        fprintf(fp, "<dict>\n");
+        fprintf(fp, "</dict>\n");
+        fprintf(fp, "</plist>\n");
+        fclose(fp);
     }
     if (strcmp(argv[2], "/") == 0) {
-        sprintf(set, "plutil -key max_rootfs_snapshot -int %s /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", argv[4]);
-        run_cmd(set);
+        modifyPlist(settingsPlist, ^(id plist) {
+        plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", argv[4]] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", argv[4]);
         do_timemachine("/");
         printf("Successfully delete the extra snapshot.\n");
         printf("Now exit.\n");
     } else if (strcmp(argv[2], "/var") == 0 || strcmp(argv[2], "/var/") == 0 || strcmp(argv[2], "/private/var") == 0 || strcmp(argv[2], "/private/var/") == 0) {
-        sprintf(set, "plutil -key max_datafs_snapshot -int %s /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", argv[4]);
-        run_cmd(set);
+        modifyPlist(settingsPlist, ^(id plist) {
+        plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", argv[4]] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", argv[4]);
         do_timemachine("/private/var");
         printf("Successfully delete the extra snapshot.\n");

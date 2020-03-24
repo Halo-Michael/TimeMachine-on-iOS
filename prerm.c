@@ -12,11 +12,11 @@
 
 extern char **environ;
 
-int run_cmd(char *cmd)
+int run_cmd(const char *cmd)
 {
     pid_t pid;
-    char *argv[] = {"sh", "-c", cmd, NULL};
-    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
+    const char *argv[] = {"sh", "-c", cmd, NULL};
+    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, (char* const*)argv, environ);
     if (status == 0) {
         if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");

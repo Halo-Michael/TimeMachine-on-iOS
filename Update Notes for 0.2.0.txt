@@ -1,5 +1,0 @@
-Now you can use "setTimeMachine(Lite)" on Terminal to select the maximum number of snapshots you want to backup for TimeMachine(Lite)!
-
-You can get the Deb package for TimeMachine on iOS from https://github.com/Halo-Michael/TimeMachine-on-iOS/releases  (That is not a repo)
-
-Or get it on my repo https://halo-michael.github.io/repo

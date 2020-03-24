@@ -1,6 +1,6 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.7.3
-CC = xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=10.3
+VERSION = 0.8.0
+CC = xcrun -sdk iphoneos clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
 
 .PHONY: all clean
@@ -18,9 +18,9 @@ all: clean postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
 	cp com.michael.TimeMachine.plist com.michael.TimeMachine-$(VERSION)_iphoneos-arm/Library/LaunchDaemons
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/bin
-	mv setTimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/bin
+	mv setTimeMachine/.theos/obj/setTimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/bin
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
-	mv TimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
+	mv TimeMachine/.theos/obj/TimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
 	dpkg -b com.michael.TimeMachine-$(VERSION)_iphoneos-arm
 
 postinst: clean
@@ -44,15 +44,10 @@ snapshotcheck: clean
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
 setTimeMachine: clean
-	$(CC) setTimeMachine.c -o setTimeMachine
-	strip setTimeMachine
-	$(LDID) -Sentitlements-apfs.xml setTimeMachine
+	sh make-setTimeMachine.sh
 
 TimeMachine: clean
-	$(CC) TimeMachine.c -o TimeMachine
-	strip TimeMachine
-	$(LDID) -Sentitlements-apfs.xml TimeMachine
+	sh make-TimeMachine.sh
 
 clean:
-	rm -rf com.michael.TimeMachine-*
-	rm -f postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
+	rm -rf com.michael.TimeMachine-* postinst preinst prerm snapshotcheck setTimeMachine/.theos TimeMachine/.theos

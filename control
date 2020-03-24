@@ -1,11 +1,11 @@
 Package: com.michael.TimeMachine
-Version: 0.7.4
+Version: 0.8.0
 Section: Tweaks
 Name: TimeMachine on iOS
 Author: halo_michael <yc992147156@me.com>
 Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
-Depends: com.bingner.plutil (>= 0.1.0), coreutils, firmware (>= 10.3)
+Depends: coreutils, firmware (>= 10.3)
 Replaces: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Conflicts: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Provides: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite

@@ -1,42 +1,19 @@
-#include <fcntl.h>
 #include <regex.h>
 #include <spawn.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/snapshot.h>
-#include <sys/uio.h>
-#include <time.h>
-#include <unistd.h>
 extern char **environ;
 
-int run_cmd(char *cmd)
+int run_cmd(const char *cmd)
 {
     pid_t pid;
-    char *argv[] = {"sh", "-c", cmd, NULL};
-    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
+    const char *argv[] = {"sh", "-c", cmd, NULL};
+    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, (char* const*)argv, environ);
     if (status == 0) {
         if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");
         }
     }
     return status;
-}
-
-int read_cmd(char* cmd, char* result)
-{
-    char buffer[10240];
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe) {
-        return -1;
-    }
-    while (!feof(pipe)) {
-        if (fgets(buffer, 4096, pipe)) {
-            strcat(result, buffer);
-        }
-    }
-    pclose(pipe);
-    return 0;
 }
 
 int do_create(const char *vol, const char *snap)
@@ -77,6 +54,8 @@ int do_delete(const char *vol, const char *snap)
 
 int do_timemachine(const char *vol)
 {
+    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
         perror("what?");
         return 1;
@@ -86,17 +65,20 @@ int do_timemachine(const char *vol)
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
         max_snapshot = 7;
     } else {
-        char buffer[1024] = "";
         if (strcmp(vol, "/") == 0) {
-            read_cmd("plutil -key max_rootfs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
+            if (![[settings objectForKey:@"max_rootfs_snapshot"] isEqual:[NSNull null]]) {
+                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            } else {
+                max_snapshot = 7;
+            }
         }
         if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
-            read_cmd("plutil -key max_datafs_snapshot /var/mobile/Library/Preferences/com.michael.TimeMachine.plist", buffer);
-        }
-        if (strlen(buffer) != 0) {
-            max_snapshot = atoi(buffer);
-        } else {
-            max_snapshot = 7;
+            if (![[settings objectForKey:@"max_datafs_snapshot"] isEqual:[NSNull null]]) {
+                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            } else {
+                max_snapshot = 7;
+            }
+            
         }
     }
     
@@ -128,17 +110,9 @@ int do_timemachine(const char *vol)
         perror("fs_snapshot_list");
         exit(1);
     }
-    
-    if (access("/tmp/snapshots", F_OK) != 0) {
-        FILE *fp = fopen("/tmp/snapshots","r+");
-        fclose(fp);
-    } else {
-        remove("/tmp/snapshots");
-        FILE *fp = fopen("/tmp/snapshots","r+");
-        fclose(fp);
-    }
-    
+
     char *p = &abuf[0];
+    NSMutableArray *snapshots = [NSMutableArray array];
     for (int i = 0; i < count; i++) {
         char *field = p;
         uint32_t len = *(uint32_t *)field;
@@ -160,62 +134,20 @@ int do_timemachine(const char *vol)
             status = regexec(&reg, name, nmatch, pmatch, 0);
             regfree(&reg);
             if (status == 0) {
-                FILE *fp = fopen("/tmp/snapshots","a+");
-                fprintf(fp, "%s", name);
-                fprintf(fp, "%s", "\n");
-                fclose(fp);
+                [snapshots addObject:[NSString stringWithFormat:@"%s", name]];
             }
         }
         
         p += len;
     }
     
-    int end, max_snapshot_num=0;
-    if (access("/tmp/snapshots", F_OK) == 0) {
-        FILE *fp = fopen("/tmp/snapshots", "r");
-        while ((end = fgetc(fp)) != EOF) {
-            if (end == '\n') {
-                max_snapshot_num++;
-            }
-        }
-        fclose(fp);
-    }
-    
-    if (max_snapshot_num > max_snapshot) {
-        for (max_snapshot_num; max_snapshot_num > max_snapshot; max_snapshot_num--) {
-            char del_snapshot[41];
-            FILE *fp = fopen("/tmp/snapshots", "r");
-            fscanf(fp, "%s\n", del_snapshot);
-            fclose(fp);
-            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", del_snapshot, vol);
-            do_delete(vol, del_snapshot);
-            
-            FILE *fin = fopen("/tmp/snapshots", "r"), *fout = fopen("/tmp/snapshots.tmp", "w");
-            int c;
-            while (1) {
-                c = fgetc(fin);
-                if (EOF == c) {
-                    break;
-                }
-                if ('\n' == c) {
-                    break;
-                }
-            }
-            if (EOF != c)
-                while (1) {
-                    c = fgetc(fin);
-                    if (EOF == c) {
-                        break;
-                    }
-                    fputc(c,fout);
-                }
-            fclose(fin);
-            fclose(fout);
-            remove("/tmp/snapshots");
-            rename("/tmp/snapshots.tmp", "/tmp/snapshots");
+    if ([snapshots count] > max_snapshot) {
+        while ([snapshots count] > max_snapshot) {
+            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
+            do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+            [snapshots removeObjectAtIndex:0];
         }
     }
-    remove("/tmp/snapshots");
     return 0;
 }
 

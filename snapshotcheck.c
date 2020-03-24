@@ -1,5 +1,4 @@
 #include <CoreFoundation/CoreFoundation.h>
-#include <spawn.h>
 #include <sys/snapshot.h>
 
 #ifndef kCFCoreFoundationVersionNumber_iOS_10_3
@@ -9,21 +8,6 @@
 #ifndef kCFCoreFoundationVersionNumber_iOS_11_0
 #   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
 #endif
-
-extern char **environ;
-
-int run_cmd(char *cmd)
-{
-    pid_t pid;
-    char *argv[] = {"sh", "-c", cmd, NULL};
-    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("waitpid");
-        }
-    }
-    return status;
-}
 
 int do_rename(const char *vol, const char *snap, const char *nw)
 {

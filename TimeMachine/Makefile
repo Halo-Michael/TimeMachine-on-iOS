@@ -1,0 +1,13 @@
+export TARGET=iphone:clang::10.3
+export ARCHS=arm64 arm64e
+export DEBUG=0
+
+include $(THEOS)/makefiles/common.mk
+
+TOOL_NAME = TimeMachine
+
+$(TOOL_NAME)_FILES = TimeMachine.m
+$(TOOL_NAME)_CFLAGS = -fobjc-arc
+$(TOOL_NAME)_CODESIGN_FLAGS = -S../entitlements-apfs.xml
+
+include $(THEOS_MAKE_PATH)/tool.mk
