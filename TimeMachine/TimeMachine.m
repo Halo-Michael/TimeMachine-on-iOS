@@ -61,24 +61,17 @@ int do_timemachine(const char *vol)
         return 1;
     }
     
-    int max_snapshot = 0;
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-        max_snapshot = 7;
-    } else {
+    int max_snapshot = 7;
+    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) == 0) {
         if (strcmp(vol, "/") == 0) {
             if (![[settings objectForKey:@"max_rootfs_snapshot"] isEqual:[NSNull null]]) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-            } else {
-                max_snapshot = 7;
             }
         }
         if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
-            if (![[settings objectForKey:@"max_datafs_snapshot"] isEqual:[NSNull null]]) {
+            if (settings[@"max_datafs_snapshot"]) {
                 max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-            } else {
-                max_snapshot = 7;
             }
-            
         }
     }
     

@@ -169,43 +169,30 @@ int main(int argc, char **argv)
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(argv[1], "-s") == 0) {
-        int max_rootfs_snapshot_printed = 0, max_datafs_snapshot_printed = 0;
         if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
             printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
-            max_rootfs_snapshot_printed = 1;
             printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
-            max_datafs_snapshot_printed = 1;
         } else {
-            int max_rootfs_snapshot = 0, max_datafs_snapshot = 0;
-            if (![[settings objectForKey:@"max_rootfs_snapshot"] isEqual:[NSNull null]]) {
+            int max_rootfs_snapshot = 7, max_datafs_snapshot = 7;
+            if (settings [@"max_rootfs_snapshot"]) {
                 max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                if (max_rootfs_snapshot != 0) {
+                    printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+                } else {
+                    printf("Won't save snapshot for rootfs\n");
+                }
             } else {
                 printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
-                max_rootfs_snapshot_printed = 1;
             }
-            if (max_rootfs_snapshot != 0) {
-                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
-                max_rootfs_snapshot_printed = 1;
-            } else {
-                if (max_rootfs_snapshot_printed == 0) {
-                    printf("Won't save snapshot for rootfs\n");
-                    max_rootfs_snapshot_printed = 1;
-                }
-            }
-            if (![[settings objectForKey:@"max_datafs_snapshot"] isEqual:[NSNull null]]) {
+            if (settings [@"max_datafs_snapshot"]) {
                 max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+                if (max_rootfs_snapshot != 0) {
+                    printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+                } else {
+                    printf("Won't save snapshot for datafs\n");
+                }
             } else {
                 printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
-                max_datafs_snapshot_printed = 1;
-            }
-            if (max_datafs_snapshot != 0) {
-                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
-                max_datafs_snapshot_printed = 1;
-            } else {
-                if (max_datafs_snapshot_printed == 0) {
-                    printf("Won't save snapshot for datafs\n");
-                    max_datafs_snapshot_printed = 1;
-                }
             }
         }
         return 0;
