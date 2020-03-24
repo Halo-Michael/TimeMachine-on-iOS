@@ -104,7 +104,7 @@ int do_timemachine(const char *vol)
     char *p = &abuf[0];
     int max_snapshot = 0;
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-        max_snapshot = 7;
+        max_snapshot = 3;
     } else {
         if (strcmp(vol, "/") == 0) {
             max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
@@ -170,8 +170,8 @@ int main(int argc, char **argv)
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(argv[1], "-s") == 0) {
         if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-            printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
-            printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
+            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
         } else {
             int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
             if (settings [@"max_rootfs_snapshot"]) {
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
                     printf("Won't save snapshot for rootfs\n");
                 }
             } else {
-                printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
+                printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
             }
             if (settings [@"max_datafs_snapshot"]) {
                 max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
                     printf("Won't save snapshot for datafs\n");
                 }
             } else {
-                printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
+                printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
             }
         }
         return 0;
