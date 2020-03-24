@@ -173,7 +173,7 @@ int main(int argc, char **argv)
             printf("The max number of snapshots has not been set for rootfs (up to 7 snapshots will be saved by default)\n");
             printf("The max number of snapshots has not been set for datafs (up to 7 snapshots will be saved by default)\n");
         } else {
-            int max_rootfs_snapshot = 7, max_datafs_snapshot = 7;
+            int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
             if (settings [@"max_rootfs_snapshot"]) {
                 max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
                 if (max_rootfs_snapshot != 0) {
