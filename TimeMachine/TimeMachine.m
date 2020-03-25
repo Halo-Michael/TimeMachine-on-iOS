@@ -64,7 +64,7 @@ int do_timemachine(const char *vol)
     int max_snapshot = 3;
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) == 0) {
         if (strcmp(vol, "/") == 0) {
-            if (![[settings objectForKey:@"max_rootfs_snapshot"] isEqual:[NSNull null]]) {
+            if (settings[@"max_rootfs_snapshot"]) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
             }
         }
