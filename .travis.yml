@@ -1,5 +1,6 @@
 # https://travis-ci.org
 
+sudo: true
 language: objective-c
 os: osx
 osx_image: xcode11.3
@@ -9,7 +10,22 @@ before_install:
   - brew install ldid dpkg xz
   - export THEOS=theos
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
-  - for i in `ls ${THEOS}/vendor/include/Preferences`; do echo "#import <Preferences/$i>" > ${THEOS}/vendor/include/Preferences/Preferences.h; done
+  - echo "#import <Preferences/PSBundleController.h>
+#import <Preferences/PSControlTableCell.h>
+#import <Preferences/PSDiscreteSlider.h>
+#import <Preferences/PSEditableTableCell.h>
+#import <Preferences/PSHeaderFooterView.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSListItemsController.h>
+#import <Preferences/PSRootController.h>
+#import <Preferences/PSSliderTableCell.h>
+#import <Preferences/PSSpecifier.h>
+#import <Preferences/PSSwitchTableCell.h>
+#import <Preferences/PSSystemPolicyForApp.h>
+#import <Preferences/PSTableCell.h>
+#import <Preferences/PSViewController.h>
+#import <Preferences/PreferencesAppController.h>
+" > ${THEOS}/vendor/include/Preferences/Preferences.h
 
 script:
   - make all
