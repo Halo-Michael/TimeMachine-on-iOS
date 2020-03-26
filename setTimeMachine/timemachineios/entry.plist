@@ -1,0 +1,10 @@
+{
+    entry = {
+	bundle = TimeMachineiOS;
+	cell = PSLinkCell;
+	detail = TimeMachineiOSListController;
+	icon = TimeMachineiOS.png;
+	isController = 1;
+	label = TimeMachineiOS;
+    };
+}

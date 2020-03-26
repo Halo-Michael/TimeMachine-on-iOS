@@ -1,0 +1,49 @@
+--- !tapi-tbd-v3
+archs:                 [ arm64, arm64e ]
+platform:              ios
+flags:                 [ flat_namespace, not_app_extension_safe ]
+install-name:          "/Library/PreferenceBundles/TimeMachineiOS.bundle/SettingsKit.framework/SettingsKit"
+current-version:       0
+compatibility-version: 0
+objc-constraint:       retain_release
+exports:
+  - archs:                [ arm64, arm64e ]
+    objc-classes:         [ SKListItemsController, SKPersonCell, SKSharedHelper,
+                            SKSpecifierParser, SKStandardController, SKTintedCell,
+                            SKTintedControlCell, SKTintedListController,
+                            SKTintedSwitchCell ]
+    objc-ivars:           [ SKPersonCell._background, SKPersonCell.label,
+                            SKPersonCell.label2, SKPersonCell.twitterButton ]
+undefineds:
+  - archs:                [ arm64, arm64e ]
+    symbols:              [ _CGContextAddRect, _CGContextClipToMask,
+                            _CGContextDrawImage, _CGContextDrawPath,
+                            _CGContextScaleCTM, _CGContextSetBlendMode,
+                            _CGContextTranslateCTM, _NSClassFromString,
+                            _NSFontAttributeName,
+                            _NSForegroundColorAttributeName, _NSLog,
+                            _NSSelectorFromString, _SLServiceTypeTwitter,
+                            _UIGraphicsBeginImageContextWithOptions,
+                            _UIGraphicsEndImageContext,
+                            _UIGraphicsGetCurrentContext,
+                            _UIGraphicsGetImageFromCurrentImageContext,
+                            ___CFConstantStringClassReference, ___stack_chk_fail,
+                            ___stack_chk_guard, __objc_empty_cache, _memset,
+                            _objc_autorelease, _objc_autoreleaseReturnValue,
+                            _objc_enumerationMutation, _objc_exception_throw,
+                            _objc_msgSend, _objc_msgSendSuper2, _objc_release,
+                            _objc_retain, _objc_retainAutorelease,
+                            _objc_retainAutoreleaseReturnValue,
+                            _objc_retainAutoreleasedReturnValue,
+                            _objc_storeStrong, dyld_stub_binder ]
+    objc-classes:         [ MFMailComposeViewController, NSArray, NSBundle,
+                            NSDictionary, NSException, NSMutableArray,
+                            NSMutableAttributedString, NSMutableDictionary,
+                            NSNumber, NSObject, NSString, NSURL, PSControlTableCell,
+                            PSListController, PSListItemsController, PSSpecifier,
+                            PSSwitchTableCell, PSTableCell,
+                            SLComposeViewController, UIApplication,
+                            UIBarButtonItem, UIButton, UIColor, UIDevice, UIFont,
+                            UIImage, UIImageView, UILabel, UIScreen, UISwitch, UIView ]
+    objc-ivars:           [ PSListController._specifiers, PSSpecifier.action ]
+...

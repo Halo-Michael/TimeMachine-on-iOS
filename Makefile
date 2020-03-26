@@ -19,6 +19,10 @@ all: clean postinst preinst prerm snapshotcheck setTimeMachine TimeMachine
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/bin
 	mv setTimeMachine/.theos/obj/setTimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/bin
+	mkdir -p com.michael.TimeMachine-$(VERSION)_iphoneos-arm/Library/PreferenceBundles
+	mkdir -p com.michael.TimeMachine-$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences
+	cp -av setTimeMachine/.theos/obj/TimeMachineiOS.bundle com.michael.TimeMachine-$(VERSION)_iphoneos-arm/Library/PreferenceBundles
+	cp -av setTimeMachine/timemachineios/entry.plist com.michael.TimeMachine-$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences/TimeMachineiOS.plist
 	mkdir com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
 	mv TimeMachine/.theos/obj/TimeMachine com.michael.TimeMachine-$(VERSION)_iphoneos-arm/usr/libexec
 	dpkg -b com.michael.TimeMachine-$(VERSION)_iphoneos-arm
@@ -51,3 +55,7 @@ TimeMachine: clean
 
 clean:
 	rm -rf com.michael.TimeMachine-* postinst preinst prerm snapshotcheck setTimeMachine/.theos TimeMachine/.theos
+
+install:
+	scp com.michael.TimeMachine-$(VERSION)_iphoneos-arm.deb root@$(THEOS_DEVICE_IP):/tmp/_theos_install.deb
+	ssh root@$(THEOS_DEVICE_IP) dpkg -i /tmp/_theos_install.deb
