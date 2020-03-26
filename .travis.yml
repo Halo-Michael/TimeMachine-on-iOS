@@ -10,7 +10,7 @@ before_install:
   - brew install ldid dpkg xz
   - export THEOS=theos
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
-  - echo "#import <Preferences/PSBundleController.h>
+  - sudo echo "#import <Preferences/PSBundleController.h>
 #import <Preferences/PSControlTableCell.h>
 #import <Preferences/PSDiscreteSlider.h>
 #import <Preferences/PSEditableTableCell.h>
