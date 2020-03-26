@@ -1,0 +1,5 @@
+"TimeMachine on iOS Settings"="TimeMachine on iOS Settings";
+"MAX_ROOTFS_SNAPSHOT"="Max rootfs snapshots";
+"MAX_ROOTFS_SNAPSHOT_DESCRIPTION"="How many rootfs snapshots would you want";
+"MAX_DATAFS_SNAPSHOT"="Max datafs snapshots";
+"MAX_DATAFS_SNAPSHOT_DESCRIPTION"="How many datafs snapshots would you want";

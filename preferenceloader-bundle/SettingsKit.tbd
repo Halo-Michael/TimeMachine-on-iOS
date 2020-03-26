@@ -2,7 +2,7 @@
 archs:                 [ arm64, arm64e ]
 platform:              ios
 flags:                 [ flat_namespace, not_app_extension_safe ]
-install-name:          "/Library/PreferenceBundles/TimeMachineiOS.bundle/SettingsKit.framework/SettingsKit"
+install-name:          "/Library/PreferenceBundles/TimeMachine.bundle/SettingsKit.framework/SettingsKit"
 current-version:       0
 compatibility-version: 0
 objc-constraint:       retain_release

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>TimeMachineiOS</string>
+	<string>TimeMachine</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.michael.TimeMachine</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -23,6 +23,6 @@
 	<key>MinimumOSVersion</key>
 	<string>10.0</string>
 	<key>NSPrincipalClass</key>
-	<string>TimeMachineiOSListController</string>
+	<string>TimeMachineListController</string>
 </dict>
 </plist>

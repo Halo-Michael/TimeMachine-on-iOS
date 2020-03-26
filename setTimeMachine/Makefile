@@ -11,5 +11,3 @@ $(TOOL_NAME)_CFLAGS = -fobjc-arc
 $(TOOL_NAME)_CODESIGN_FLAGS = -S../entitlements-apfs.xml
 
 include $(THEOS_MAKE_PATH)/tool.mk
-SUBPROJECTS += timemachineios
-include $(THEOS_MAKE_PATH)/aggregate.mk
