@@ -20,7 +20,6 @@
 #import <Preferences/PSSystemPolicyForApp.h>
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSViewController.h>
-#import <Preferences/Preferences.h>
 #import <Preferences/PreferencesAppController.h>
 #import "Headers/SKListControllerProtocol.h"
 #import "Headers/SKTintedListController.h"
