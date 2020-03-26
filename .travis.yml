@@ -10,6 +10,7 @@ before_install:
   - brew install ldid dpkg xz
   - export THEOS=/opt/theos
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
+  - for i in `ls ${THEOS}/vendor/include/Preferences`; do sudo echo "#import <Preferences/$i>" > ${THEOS}/vendor/include/Preferences/Preferences.h; done
 
 script:
   - make all
