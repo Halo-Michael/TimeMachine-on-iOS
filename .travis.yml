@@ -8,7 +8,7 @@ osx_image: xcode11.3
 before_install:
   - brew update
   - brew install ldid dpkg xz
-  - export THEOS=theos
+  - export THEOS=/opt/theos
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
   
 script:
