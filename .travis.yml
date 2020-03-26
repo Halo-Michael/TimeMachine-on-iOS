@@ -10,22 +10,21 @@ before_install:
   - brew install ldid dpkg xz
   - export THEOS=theos
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
-  - sudo echo '#import <Preferences/PSBundleController.h>
-#import <Preferences/PSControlTableCell.h>
-#import <Preferences/PSDiscreteSlider.h>
-#import <Preferences/PSEditableTableCell.h>
-#import <Preferences/PSHeaderFooterView.h>
-#import <Preferences/PSListController.h>
-#import <Preferences/PSListItemsController.h>
-#import <Preferences/PSRootController.h>
-#import <Preferences/PSSliderTableCell.h>
-#import <Preferences/PSSpecifier.h>
-#import <Preferences/PSSwitchTableCell.h>
-#import <Preferences/PSSystemPolicyForApp.h>
-#import <Preferences/PSTableCell.h>
-#import <Preferences/PSViewController.h>
-#import <Preferences/PreferencesAppController.h>
-' > ${THEOS}/vendor/include/Preferences/Preferences.h
-
+  - sudo echo "#import <Preferences/PSBundleController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSControlTableCell.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSDiscreteSlider.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSEditableTableCell.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSHeaderFooterView.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSListController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSListItemsController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSRootController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSSliderTableCell.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSSpecifier.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSSwitchTableCell.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSSystemPolicyForApp.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSTableCell.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PSViewController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  - sudo echo "#import <Preferences/PreferencesAppController.h>" >> ${THEOS}/vendor/include/Preferences/Preferences.h
+  
 script:
   - make all
