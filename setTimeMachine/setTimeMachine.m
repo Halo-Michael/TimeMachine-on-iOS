@@ -186,7 +186,7 @@ int main(int argc, char **argv)
             }
             if (settings [@"max_datafs_snapshot"]) {
                 max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-                if (max_rootfs_snapshot != 0) {
+                if (max_datafs_snapshot != 0) {
                     printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
                 } else {
                     printf("Won't save snapshot for datafs\n");
