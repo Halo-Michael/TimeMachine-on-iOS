@@ -1,5 +1,5 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.8.4
+VERSION = 0.8.5
 CC = xcrun -sdk iphoneos clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
 
