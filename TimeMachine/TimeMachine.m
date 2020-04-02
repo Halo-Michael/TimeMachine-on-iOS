@@ -1,20 +1,5 @@
 #include <regex.h>
-#include <spawn.h>
 #include <sys/snapshot.h>
-extern char **environ;
-
-int run_cmd(const char *cmd)
-{
-    pid_t pid;
-    const char *argv[] = {"sh", "-c", cmd, NULL};
-    int status = posix_spawn(&pid, "/bin/sh", NULL, NULL, (char* const*)argv, environ);
-    if (status == 0) {
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("waitpid");
-        }
-    }
-    return status;
-}
 
 int do_create(const char *vol, const char *snap)
 {
@@ -151,7 +136,7 @@ int main()
         printf("Run this as root!\n");
         exit(1);
     }
-    run_cmd("/etc/rc.d/snapshotcheck");
+    system("/etc/rc.d/snapshotcheck");
     do_timemachine("/");
     do_timemachine("/private/var");
     printf("TimeMachine on iOS's work is down, enjoy safety.\n");
