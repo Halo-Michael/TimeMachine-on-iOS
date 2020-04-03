@@ -91,14 +91,7 @@ void respring() {
 }
 
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
-    NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/%@.plist", specifier.properties[@"defaults"]];
-	
-    NSMutableDictionary *settings = [NSMutableDictionary dictionary];
-	[settings addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
-	[settings setObject:value forKey:specifier.properties[@"key"]];
-	[settings writeToFile:path atomically:YES];
-
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("TimeMachine-on-iOS/reloadSettings"), NULL, NULL, YES);
+    [super setPreferenceValue:value specifier:specifier];
 
     if([specifier.properties[@"key"] isEqualToString:@"max_rootfs_snapshot"]) {
         execCommand("/usr/bin/setTimeMachine", (const char*[]){"setTimeMachine", "-f", "/", "-n", [((NSNumber *)(value)).description UTF8String], NULL});
