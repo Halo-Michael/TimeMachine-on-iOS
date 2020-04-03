@@ -155,10 +155,15 @@ int do_timemachine(const char *vol)
 
 int main(int argc, char **argv)
 {
-    if (geteuid() != 0) {
-        printf("Run this as root!\n");
-        exit(1);
+    if (getuid() != 0) {
+        setuid(0);
     }
+    
+    if (getuid() != 0) {
+        printf("Can't set uid as 0.\n");
+        return 1;
+    }
+    
     if (argc != 2) {
         if (argc != 5 || strcmp(argv[1], "-f") != 0 || strcmp(argv[3], "-n") != 0 || do_check(argv[4]) != 0) {
             usage();

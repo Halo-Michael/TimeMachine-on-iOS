@@ -132,10 +132,15 @@ int do_timemachine(const char *vol)
 
 int main()
 {
-    if (geteuid() != 0) {
-        printf("Run this as root!\n");
-        exit(1);
+    if (getuid() != 0) {
+        setuid(0);
     }
+    
+    if (getuid() != 0) {
+        printf("Can't set uid as 0.\n");
+        return 1;
+    }
+    
     system("/etc/rc.d/snapshotcheck");
     do_timemachine("/");
     do_timemachine("/private/var");

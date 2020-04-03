@@ -1,9 +1,9 @@
-ARCHS = arm64 arm64e
-TARGET = iphone:clang::10.3
-CFLAGS = -fobjc-arc
-LDFLAGS = -F$(THEOS)/frameworks
-DEBUG = 0
-GO_EASY_ON_ME = 1
+export ARCHS = arm64 arm64e
+export TARGET = iphone:clang::10.3
+export CFLAGS = -fobjc-arc
+export LDFLAGS = -F$(THEOS)/frameworks
+export DEBUG = 0
+export GO_EASY_ON_ME = 1
 
 include $(THEOS)/makefiles/common.mk
 

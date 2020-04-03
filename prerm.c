@@ -29,9 +29,9 @@ int do_rename(const char *vol, const char *snap, const char *nw)
 
 int main(int argc, char **argv)
 {
-    if (geteuid() != 0) {
+    if (getuid() != 0) {
         printf("Run this as root!\n");
-        exit(1);
+        return 1;
     }
     
     system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
