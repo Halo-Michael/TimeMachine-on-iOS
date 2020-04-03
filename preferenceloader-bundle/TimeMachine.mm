@@ -83,13 +83,11 @@
     [super setPreferenceValue:value specifier:specifier];
 
     if([specifier.properties[@"key"] isEqualToString:@"max_rootfs_snapshot"]) {
-        const char *command = [NSString stringWithFormat:@"setTimeMachine -f / -n %@", value].UTF8String;
-        system(command);
+        system([NSString stringWithFormat:@"setTimeMachine -f / -n %@", value].UTF8String);
     }
 
     if([specifier.properties[@"key"] isEqualToString:@"max_datafs_snapshot"]) {
-        const char *command = [NSString stringWithFormat:@"setTimeMachine -f /var -n %@", value].UTF8String;
-        system(command);
+        system([NSString stringWithFormat:@"setTimeMachine -f /var -n %@", value].UTF8String;);
     }
 }
 @end
