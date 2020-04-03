@@ -9,18 +9,7 @@
 #import <Preferences/Preferences.h>
 #import "Headers/SKListControllerProtocol.h"
 #import "Headers/SKTintedListController.h"
-#include <spawn.h>
-
-void execCommand (const char* execPath, const char* args[]) {
-    pid_t pid;
-    int status;
-    posix_spawn(&pid, execPath, NULL, NULL, (char* const*)args, NULL);
-    waitpid(pid, &status, WEXITED);
-}
-
-void respring() {
-    execCommand("/usr/bin/killall", (const char*[]){"killall", "-9", "SpringBoard", "backboardd", NULL});
-}
+#import <stdlib.h>
 
 @interface TimeMachineListController: SKTintedListController<SKListControllerProtocol>
 @end
@@ -94,11 +83,13 @@ void respring() {
     [super setPreferenceValue:value specifier:specifier];
 
     if([specifier.properties[@"key"] isEqualToString:@"max_rootfs_snapshot"]) {
-        execCommand("/usr/bin/setTimeMachine", (const char*[]){"setTimeMachine", "-f", "/", "-n", [((NSNumber *)(value)).description UTF8String], NULL});
+        const char *command = [NSString stringWithFormat:@"setTimeMachine -f / -n %@", value].UTF8String;
+        system(command);
     }
 
     if([specifier.properties[@"key"] isEqualToString:@"max_datafs_snapshot"]) {
-        execCommand("/usr/bin/setTimeMachine", (const char*[]){"setTimeMachine", "-f", "/var", "-n", [((NSNumber *)(value)).description UTF8String], NULL});
+        const char *command = [NSString stringWithFormat:@"setTimeMachine -f /var -n %@", value].UTF8String;
+        system(command);
     }
 }
 @end
