@@ -8,7 +8,7 @@ int do_create(const char *vol, const char *snap)
         perror("open");
         exit(1);
     }
-    
+
     int ret = fs_snapshot_create(dirfd, snap, 0);
     if (ret != 0) {
         perror("fs_snapshot_create");
@@ -26,7 +26,7 @@ int do_delete(const char *vol, const char *snap)
         perror("open");
         exit(1);
     }
-    
+
     int ret = fs_snapshot_delete(dirfd, snap, 0);
     if (ret != 0) {
         perror("fs_snapshot_delete");
@@ -34,7 +34,7 @@ int do_delete(const char *vol, const char *snap)
     } else {
         printf("Success\n");
     }
-    return (ret);
+    return ret;
 }
 
 int do_timemachine(const char *vol)
@@ -45,7 +45,7 @@ int do_timemachine(const char *vol)
         perror("what?");
         return 1;
     }
-    
+
     int max_snapshot = 3;
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) == 0) {
         if (strcmp(vol, "/") == 0) {
@@ -59,7 +59,7 @@ int do_timemachine(const char *vol)
             }
         }
     }
-    
+
     if (max_snapshot != 0) {
         time_t time_T;
         time_T = time(NULL);
@@ -71,18 +71,18 @@ int do_timemachine(const char *vol)
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
         do_create(vol, cre_snapshot);
     }
-    
+
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
         exit(1);
     }
-    
+
     struct attrlist alist = { 0 };
     char abuf[2048];
-    
+
     alist.commonattr = ATTR_BULK_REQUIRED;
-    
+
     int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
     if (count < 0) {
         perror("fs_snapshot_list");
@@ -97,7 +97,7 @@ int do_timemachine(const char *vol)
         field += sizeof (uint32_t);
         attribute_set_t attrs = *(attribute_set_t *)field;
         field += sizeof (attribute_set_t);
-        
+
         if (attrs.commonattr & ATTR_CMN_NAME) {
             attrreference_t ar = *(attrreference_t *)field;
             char *name = field + ar.attr_dataoffset;
@@ -115,10 +115,9 @@ int do_timemachine(const char *vol)
                 [snapshots addObject:[NSString stringWithFormat:@"%s", name]];
             }
         }
-        
         p += len;
     }
-    
+
     if ([snapshots count] > max_snapshot) {
         while ([snapshots count] > max_snapshot) {
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
@@ -129,19 +128,23 @@ int do_timemachine(const char *vol)
     return 0;
 }
 
-
 int main()
 {
     if (getuid() != 0) {
         setuid(0);
     }
-    
+
     if (getuid() != 0) {
         printf("Can't set uid as 0.\n");
         return 1;
     }
-    
-    system("/etc/rc.d/snapshotcheck");
+
+    int ststus = system("/etc/rc.d/snapshotcheck");
+    if (WEXITSTATUS(status) != 0) {
+        printf("Error in command: /etc/rc.d/snapshotcheck\n");
+        return WEXITSTATUS(status);
+    }
+
     do_timemachine("/");
     do_timemachine("/private/var");
     printf("TimeMachine on iOS's work is down, enjoy safety.\n");

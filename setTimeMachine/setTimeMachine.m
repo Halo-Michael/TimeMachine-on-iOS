@@ -43,7 +43,7 @@ int do_delete(const char *vol, const char *snap)
         perror("open");
         exit(1);
     }
-    
+
     int ret = fs_snapshot_delete(dirfd, snap, 0);
     if (ret != 0) {
         perror("fs_snapshot_delete");
@@ -51,7 +51,7 @@ int do_delete(const char *vol, const char *snap)
     } else {
         printf("Success\n");
     }
-    return (ret);
+    return ret;
 }
 
 int do_check(const char *num)
@@ -83,24 +83,24 @@ int do_timemachine(const char *vol)
         perror("what?");
         return 1;
     }
-    
+
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
         exit(1);
     }
-    
+
     struct attrlist alist = { 0 };
     char abuf[2048];
-    
+
     alist.commonattr = ATTR_BULK_REQUIRED;
-    
+
     int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
     if (count < 0) {
         perror("fs_snapshot_list");
         exit(1);
     }
-    
+
     char *p = &abuf[0];
     int max_snapshot = 0;
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
@@ -121,7 +121,7 @@ int do_timemachine(const char *vol)
         field += sizeof (uint32_t);
         attribute_set_t attrs = *(attribute_set_t *)field;
         field += sizeof (attribute_set_t);
-        
+
         if (attrs.commonattr & ATTR_CMN_NAME) {
             attrreference_t ar = *(attrreference_t *)field;
             char *name = field + ar.attr_dataoffset;
@@ -139,10 +139,9 @@ int do_timemachine(const char *vol)
                 [snapshots addObject:[NSString stringWithFormat:@"%s", name]];
             }
         }
-        
         p += len;
     }
-    
+
     if ([snapshots count] > max_snapshot) {
         while ([snapshots count] > max_snapshot) {
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
@@ -153,17 +152,17 @@ int do_timemachine(const char *vol)
     return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
     if (getuid() != 0) {
         setuid(0);
     }
-    
+
     if (getuid() != 0) {
         printf("Can't set uid as 0.\n");
         return 1;
     }
-    
+
     if (argc != 2) {
         if (argc != 5 || strcmp(argv[1], "-f") != 0 || strcmp(argv[3], "-n") != 0 || do_check(argv[4]) != 0) {
             usage();
