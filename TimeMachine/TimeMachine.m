@@ -139,7 +139,7 @@ int main()
         return 1;
     }
 
-    int ststus = system("/etc/rc.d/snapshotcheck");
+    int status = system("/etc/rc.d/snapshotcheck");
     if (WEXITSTATUS(status) != 0) {
         printf("Error in command: /etc/rc.d/snapshotcheck\n");
         return WEXITSTATUS(status);
