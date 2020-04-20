@@ -141,7 +141,7 @@ int main()
 
     int status = system("/etc/rc.d/snapshotcheck");
     if (WEXITSTATUS(status) != 0) {
-        printf("Error in command: /etc/rc.d/snapshotcheck\n");
+        printf("Error in command: \"/etc/rc.d/snapshotcheck\"\n");
         return WEXITSTATUS(status);
     }
 

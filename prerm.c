@@ -36,7 +36,7 @@ int main(int argc, const char **argv)
 
     int status = system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
     if (WEXITSTATUS(status) != 0) {
-        printf("Error in command: launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist\n");
+        printf("Error in command: \"launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist\"\n");
         return WEXITSTATUS(status);
     }
 
