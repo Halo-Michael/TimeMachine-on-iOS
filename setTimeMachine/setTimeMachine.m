@@ -1,31 +1,4 @@
-#include <regex.h>
-#include <sys/snapshot.h>
-
-bool modifyPlist(NSString *filename, void (^function)(id)) {
-    NSData *data = [NSData dataWithContentsOfFile:filename];
-    if (data == nil) {
-        return false;
-    }
-    NSPropertyListFormat format = 0;
-    NSError *error = nil;
-    id plist = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainersAndLeaves format:&format error:&error];
-    if (plist == nil) {
-        return false;
-    }
-    if (function) {
-        function(plist);
-    }
-    NSData *newData = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:&error];
-    if (newData == nil) {
-        return false;
-    }
-    if (![data isEqual:newData]) {
-        if (![newData writeToFile:filename atomically:YES]) {
-            return false;
-        }
-    }
-    return true;
-}
+#include "../utils_objc.h"
 
 void usage()
 {
@@ -34,45 +7,6 @@ void usage()
     printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
     printf("\t-s\t\t\tShow current settings.\n");
     exit(2);
-}
-
-int do_delete(const char *vol, const char *snap)
-{
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-
-    int ret = fs_snapshot_delete(dirfd, snap, 0);
-    if (ret != 0) {
-        perror("fs_snapshot_delete");
-        printf("Failure\n");
-    } else {
-        printf("Success\n");
-    }
-    return ret;
-}
-
-int do_check(const char *num)
-{
-    if (strcmp(num, "0") == 0) {
-        return 0;
-    }
-    const char* p = num;
-    if (*p < '1' || *p > '9') {
-        return 1;
-    } else {
-        p++;
-    }
-    while (*p) {
-        if(*p < '0' || *p > '9') {
-            return 1;
-        } else {
-            p++;
-        }
-    }
-    return 0;
 }
 
 int do_timemachine(const char *vol)

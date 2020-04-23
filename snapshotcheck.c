@@ -1,34 +1,6 @@
-#include <CoreFoundation/CoreFoundation.h>
-#include <sys/snapshot.h>
+#include "utils.h"
 
-#ifndef kCFCoreFoundationVersionNumber_iOS_10_3
-#   define kCFCoreFoundationVersionNumber_iOS_10_3 1349.56
-#endif
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_11_0
-#   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
-#endif
-
-int do_rename(const char *vol, const char *snap, const char *nw)
-{
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-
-    int ret = fs_snapshot_rename(dirfd, snap, nw, 0);
-    if (ret != 0) {
-        perror("fs_snapshot_rename");
-        printf("Failure\n");
-    } else {
-        printf("Success\n");
-    }
-    return ret;
-}
-
-int main()
-{
+int main() {
     if (getuid() != 0) {
         setuid(0);
     }

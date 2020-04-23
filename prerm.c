@@ -1,31 +1,4 @@
-#include <CoreFoundation/CoreFoundation.h>
-#include <sys/snapshot.h>
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_10_3
-#   define kCFCoreFoundationVersionNumber_iOS_10_3 1349.56
-#endif
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_11_0
-#   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
-#endif
-
-int do_rename(const char *vol, const char *snap, const char *nw)
-{
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-
-    int ret = fs_snapshot_rename(dirfd, snap, nw, 0);
-    if (ret != 0) {
-        perror("fs_snapshot_rename");
-        printf("Failure\n");
-    } else {
-        printf("Success\n");
-    }
-    return ret;
-}
+#include "utils.h"
 
 int main(int argc, const char **argv)
 {
@@ -34,11 +7,7 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    int status = system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
-    if (WEXITSTATUS(status) != 0) {
-        printf("Error in command: \"launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist\"\n");
-        return WEXITSTATUS(status);
-    }
+    run_system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
 
     if (strcmp(argv[1], "upgrade") == 0) {
         return 0;

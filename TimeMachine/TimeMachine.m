@@ -1,41 +1,4 @@
-#include <regex.h>
-#include <sys/snapshot.h>
-
-int do_create(const char *vol, const char *snap)
-{
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-
-    int ret = fs_snapshot_create(dirfd, snap, 0);
-    if (ret != 0) {
-        perror("fs_snapshot_create");
-        printf("Failure\n");
-    } else {
-        printf("Success\n");
-    }
-    return (ret);
-}
-
-int do_delete(const char *vol, const char *snap)
-{
-    int dirfd = open(vol, O_RDONLY, 0);
-    if (dirfd < 0) {
-        perror("open");
-        exit(1);
-    }
-
-    int ret = fs_snapshot_delete(dirfd, snap, 0);
-    if (ret != 0) {
-        perror("fs_snapshot_delete");
-        printf("Failure\n");
-    } else {
-        printf("Success\n");
-    }
-    return ret;
-}
+#include "../utils_objc.h"
 
 int do_timemachine(const char *vol)
 {
@@ -139,11 +102,7 @@ int main()
         return 1;
     }
 
-    int status = system("/etc/rc.d/snapshotcheck");
-    if (WEXITSTATUS(status) != 0) {
-        printf("Error in command: \"/etc/rc.d/snapshotcheck\"\n");
-        return WEXITSTATUS(status);
-    }
+    run_system("/etc/rc.d/snapshotcheck");
 
     do_timemachine("/");
     do_timemachine("/private/var");

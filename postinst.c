@@ -1,22 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "utils.h"
 
-int main()
-{
+int main() {
     if (getuid() != 0) {
         printf("Run this as root!\n");
         return 1;
     }
 
-    char *commands[8] = {"chown root:wheel /etc/rc.d/snapshotcheck", "chmod 6755 /etc/rc.d/snapshotcheck", "chown root:wheel /Library/LaunchDaemons/com.michael.TimeMachine.plist", "chown root:wheel /usr/libexec/TimeMachine", "chmod 6755 /usr/libexec/TimeMachine", "chown root:wheel /usr/bin/setTimeMachine", "chmod 6755 /usr/bin/setTimeMachine", "launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist"};
-
-    for (int i = 0; i < 8; i++) {
-        int status = system(commands[i]);
-        if (WEXITSTATUS(status) != 0) {
-            printf("Error in command: \"%s\"\n", commands[i]);
-            return WEXITSTATUS(status);
-        }
-    }
+    run_system("chown root:wheel /etc/rc.d/snapshotcheck");
+    run_system("chmod 6755 /etc/rc.d/snapshotcheck");
+    run_system("chown root:wheel /Library/LaunchDaemons/com.michael.TimeMachine.plist");
+    run_system("chown root:wheel /usr/libexec/TimeMachine");
+    run_system("chmod 6755 /usr/libexec/TimeMachine");
+    run_system("chown root:wheel /usr/bin/setTimeMachine");
+    run_system("chmod 6755 /usr/bin/setTimeMachine");
+    run_system("launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist");
     return 0;
 }
