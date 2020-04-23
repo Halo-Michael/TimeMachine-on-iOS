@@ -9,8 +9,7 @@
 #   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
 #endif
 
-int do_create(const char *vol, const char *snap)
-{
+int do_create(const char *vol, const char *snap) {
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
@@ -27,8 +26,7 @@ int do_create(const char *vol, const char *snap)
     return (ret);
 }
 
-int do_check(const char *num)
-{
+int do_check(const char *num) {
     if (strcmp(num, "0") == 0) {
         return 0;
     }
@@ -48,8 +46,7 @@ int do_check(const char *num)
     return 0;
 }
 
-int do_delete(const char *vol, const char *snap)
-{
+int do_delete(const char *vol, const char *snap) {
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
