@@ -1,7 +1,6 @@
 #include "../utils_objc.h"
 
-int do_timemachine(const char *vol)
-{
+int do_timemachine(const char *vol) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
@@ -91,8 +90,7 @@ int do_timemachine(const char *vol)
     return 0;
 }
 
-int main()
-{
+int main() {
     if (getuid() != 0) {
         setuid(0);
     }

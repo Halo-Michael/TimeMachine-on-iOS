@@ -1,7 +1,6 @@
 #include "utils.h"
 
-int main(int argc, const char **argv)
-{
+int main(int argc, const char **argv) {
     if (getuid() != 0) {
         printf("Run this as root!\n");
         return 1;

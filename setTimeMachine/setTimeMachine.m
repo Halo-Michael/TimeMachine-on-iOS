@@ -1,7 +1,6 @@
 #include "../utils_objc.h"
 
-void usage()
-{
+void usage() {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
     printf("\t-h\t\t\tPrint this help.\n");
     printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
@@ -9,8 +8,7 @@ void usage()
     exit(2);
 }
 
-int do_timemachine(const char *vol)
-{
+int do_timemachine(const char *vol) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
@@ -86,8 +84,7 @@ int do_timemachine(const char *vol)
     return 0;
 }
 
-int main(int argc, const char **argv)
-{
+int main(int argc, const char **argv) {
     if (getuid() != 0) {
         setuid(0);
     }
