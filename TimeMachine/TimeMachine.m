@@ -5,7 +5,7 @@ int do_timemachine(const char *vol) {
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
         perror("what?");
-        return 1;
+        exit(1);
     }
 
     int max_snapshot = 3;
@@ -86,6 +86,8 @@ int do_timemachine(const char *vol) {
             do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
             [snapshots removeObjectAtIndex:0];
         }
+    } else {
+        return 1;
     }
     return 0;
 }

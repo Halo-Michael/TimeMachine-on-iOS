@@ -5,7 +5,37 @@ void usage() {
     printf("\t-h\t\t\tPrint this help.\n");
     printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
     printf("\t-s\t\t\tShow current settings.\n");
-    exit(2);
+}
+
+void showSettings() {
+    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
+    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
+        printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+        printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+    } else {
+        int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
+        if (settings [@"max_rootfs_snapshot"]) {
+            max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            if (max_rootfs_snapshot != 0) {
+                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+            } else {
+                printf("Won't save snapshot for rootfs\n");
+            }
+        } else {
+            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+        }
+        if (settings [@"max_datafs_snapshot"]) {
+            max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            if (max_datafs_snapshot != 0) {
+                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+            } else {
+                printf("Won't save snapshot for datafs\n");
+            }
+        } else {
+            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+        }
+    }
 }
 
 int do_timemachine(const char *vol) {
@@ -13,7 +43,7 @@ int do_timemachine(const char *vol) {
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
         perror("what?");
-        return 1;
+        exit(1);
     }
 
     int dirfd = open(vol, O_RDONLY, 0);
@@ -80,11 +110,13 @@ int do_timemachine(const char *vol) {
             do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
             [snapshots removeObjectAtIndex:0];
         }
+    } else {
+        return 1;
     }
     return 0;
 }
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
     if (getuid() != 0) {
         setuid(0);
     }
@@ -94,44 +126,39 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    if (argc != 2) {
-        if (argc != 5 || strcmp(argv[1], "-f") != 0 || strcmp(argv[3], "-n") != 0 || do_check(argv[4]) != 0) {
-            usage();
+    int c;
+    char *filesystem = NULL, *number = NULL;
+    while ((c = getopt(argc, argv, "f:hn:s")) != -1) {
+        switch (c) {
+            case 'h':
+                usage();
+                return 0;
+                break;
+            case 's':
+                showSettings();
+                return 0;
+                break;
+            case 'f':
+                filesystem = optarg;
+                break;
+            case 'n':
+                if (do_check(optarg) != 0) {
+                    usage();
+                    return 1;
+                } else {
+                    number = optarg;
+                }
+                break;
         }
-    } else if (strcmp(argv[1], "-s") != 0) {
+    }
+
+    if (filesystem == NULL || number == NULL) {
         usage();
+        return 1;
     }
+
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    if (strcmp(argv[1], "-s") == 0) {
-        if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
-        } else {
-            int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
-            if (settings [@"max_rootfs_snapshot"]) {
-                max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-                if (max_rootfs_snapshot != 0) {
-                    printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
-                } else {
-                    printf("Won't save snapshot for rootfs\n");
-                }
-            } else {
-                printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-            }
-            if (settings [@"max_datafs_snapshot"]) {
-                max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-                if (max_datafs_snapshot != 0) {
-                    printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
-                } else {
-                    printf("Won't save snapshot for datafs\n");
-                }
-            } else {
-                printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
-            }
-        }
-        return 0;
-    }
+
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
         FILE *fp = fopen("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist","a+");
         fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -142,22 +169,29 @@ int main(int argc, const char **argv) {
         fprintf(fp, "</plist>\n");
         fclose(fp);
     }
-    if (strcmp(argv[2], "/") == 0) {
+    if (strcmp(filesystem, "/") == 0) {
         modifyPlist(settingsPlist, ^(id plist) {
-        plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", argv[4]] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", argv[4]);
-        do_timemachine("/");
-        printf("Successfully delete the extra snapshot.\n");
+        plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
+        printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", number);
+        if (do_timemachine("/") == 0) {
+            printf("Successfully delete the extra snapshot.\n");
+        } else {
+            printf("There is nothing to do.\n");
+        }
         printf("Now exit.\n");
-    } else if (strcmp(argv[2], "/var") == 0 || strcmp(argv[2], "/var/") == 0 || strcmp(argv[2], "/private/var") == 0 || strcmp(argv[2], "/private/var/") == 0) {
+    } else if (strcmp(filesystem, "/var") == 0 || strcmp(filesystem, "/var/") == 0 || strcmp(filesystem, "/private/var") == 0 || strcmp(filesystem, "/private/var/") == 0) {
         modifyPlist(settingsPlist, ^(id plist) {
-        plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", argv[4]] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", argv[4]);
-        do_timemachine("/private/var");
-        printf("Successfully delete the extra snapshot.\n");
+        plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
+        printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", number);
+        if (do_timemachine("/private/var") == 0) {
+            printf("Successfully delete the extra snapshot.\n");
+        } else {
+            printf("There is nothing to do.\n");
+        }
         printf("Now exit.\n");
     } else {
         usage();
+        return 1;
     }
     return 0;
 }
