@@ -1,4 +1,7 @@
-#include "../utils_objc.h"
+#import <CoreFoundation/CoreFoundation.h>
+#import <regex.h>
+#import <sys/snapshot.h>
+#import "../utils.h"
 
 int do_timemachine(const char *vol) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";

@@ -1,5 +1,5 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.8.12
+VERSION = 0.8.14
 CC = xcrun -sdk iphoneos clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
 
@@ -29,22 +29,22 @@ all: clean postinst preinst prerm preferenceloader-bundle snapshotcheck setTimeM
 	dpkg -b com.michael.TimeMachine_$(VERSION)_iphoneos-arm
 
 postinst: clean
-	$(CC) postinst.c -o postinst
+	$(CC) postinst.c utils.c -o postinst -framework CoreFoundation
 	strip postinst
 	$(LDID) -Sentitlements.xml postinst
 
 preinst: clean
-	$(CC) preinst.c -o preinst -framework CoreFoundation
+	$(CC) preinst.c utils.c -o preinst -framework CoreFoundation
 	strip preinst
 	$(LDID) -Sentitlements-apfs.xml preinst
 
 prerm: clean
-	$(CC) prerm.c -o prerm -framework CoreFoundation
+	$(CC) prerm.c utils.c -o prerm -framework CoreFoundation
 	strip prerm
 	$(LDID) -Sentitlements-apfs.xml prerm
 
 snapshotcheck: clean
-	$(CC) snapshotcheck.c -o snapshotcheck -framework CoreFoundation
+	$(CC) snapshotcheck.c utils.c -o snapshotcheck -framework CoreFoundation
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 

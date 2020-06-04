@@ -1,5 +1,5 @@
 export ARCHS = arm64 arm64e
-export TARGET = iphone:clang::10.3
+export TARGET = iphone:clang:13.0:10.3
 export CFLAGS = -fobjc-arc
 export LDFLAGS = -F$(THEOS)/frameworks
 export DEBUG = 0
@@ -12,7 +12,8 @@ $(BUNDLE_NAME)_FILES = TimeMachine.mm
 $(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
 $(BUNDLE_NAME)_CFLAGS = -fobjc-arc
 $(BUNDLE_NAME)_FRAMEWORKS = UIKit MessageUI Social QuartzCore CoreGraphics
-$(BUNDLE_NAME)_LDFLAGS += ./Preferences.tbd ./SettingsKit.tbd
+$(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences
+$(BUNDLE_NAME)_LDFLAGS += ./SettingsKit.tbd
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

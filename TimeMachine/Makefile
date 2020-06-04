@@ -6,7 +6,7 @@ include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = TimeMachine
 
-$(TOOL_NAME)_FILES = TimeMachine.m
+$(TOOL_NAME)_FILES = TimeMachine.m ../utils.c ../utils_objc.m
 $(TOOL_NAME)_CFLAGS = -fobjc-arc
 $(TOOL_NAME)_CODESIGN_FLAGS = -S../entitlements-apfs.xml
 

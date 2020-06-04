@@ -1,5 +1,5 @@
-#include <regex.h>
-#include "utils.h"
+#import <CoreFoundation/CoreFoundation.h>
+#import <regex.h>
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {
     NSData *data = [NSData dataWithContentsOfFile:filename];

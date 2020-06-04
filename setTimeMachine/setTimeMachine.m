@@ -1,4 +1,7 @@
-#include "../utils_objc.h"
+#import <CoreFoundation/CoreFoundation.h>
+#import <regex.h>
+#import <sys/snapshot.h>
+#import "../utils.h"
 
 void usage() {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
