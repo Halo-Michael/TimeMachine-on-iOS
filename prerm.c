@@ -1,5 +1,4 @@
 #include <CoreFoundation/CoreFoundation.h>
-#include <sys/snapshot.h>
 #include "utils.h"
 
 int main(int argc, const char **argv) {
