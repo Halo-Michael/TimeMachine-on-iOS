@@ -56,11 +56,11 @@ int main() {
 
         if (has_orig_fs == true) {
             printf("Will rename snapshot \"orig-fs\" on fs / to \"com.apple.TimeMachine.orig-fs\"\n");
-            do_rename("/", "orig-fs", "com.apple.TimeMachine.orig-fs");
+            snapshot_rename("/", "orig-fs", "com.apple.TimeMachine.orig-fs");
         }
         if (has_electra_prejailbreak == true) {
             printf("Will rename snapshot \"electra-prejailbreak\" on fs / to \"com.apple.TimeMachine.electra-prejailbreak\"\n");
-            do_rename("/", "electra-prejailbreak", "com.apple.TimeMachine.electra-prejailbreak");
+            snapshot_rename("/", "electra-prejailbreak", "com.apple.TimeMachine.electra-prejailbreak");
         }
     } else if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_10_3) {
         printf("iOS10 detected, skip orig snapshot check.\n");

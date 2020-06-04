@@ -15,10 +15,11 @@ bool modifyPlist(NSString *filename, void (^function)(id));
 
 #endif
 
-int do_create(const char *vol, const char *snap);
 int do_check(const char *num);
-int do_delete(const char *vol, const char *snap);
-int do_rename(const char *vol, const char *snap, const char *nw);
+int snapshot_create(const char *vol, const char *snap);
+int snapshot_check(const char *vol, const char *snap);
+int snapshot_delete(const char *vol, const char *snap);
+int snapshot_rename(const char *vol, const char *snap, const char *nw);
 void run_system(const char *cmd);
 
 #endif

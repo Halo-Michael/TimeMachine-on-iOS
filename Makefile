@@ -5,7 +5,7 @@ LDID = ldid
 
 .PHONY: all clean
 
-all: clean libTimeMachine postinst preinst prerm preferenceloader-bundle snapshotcheck setTimeMachine TimeMachine
+all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck setTimeMachine TimeMachine
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
@@ -38,11 +38,6 @@ postinst: clean
 	strip postinst
 	$(LDID) -Sentitlements.xml postinst
 
-preinst: clean
-	$(CC) preinst.c -o preinst -framework CoreFoundation libTimeMachine.tbd
-	strip preinst
-	$(LDID) -Sentitlements-apfs.xml preinst
-
 prerm: clean
 	$(CC) prerm.c -o prerm -framework CoreFoundation libTimeMachine.tbd
 	strip prerm
@@ -63,7 +58,7 @@ TimeMachine: clean
 	sh make-TimeMachine.sh
 
 clean:
-	rm -rf com.michael.TimeMachine_* libTimeMachine/.theos postinst preinst prerm preferenceloader-bundle/.theos snapshotcheck setTimeMachine/.theos TimeMachine/.theos
+	rm -rf com.michael.TimeMachine_* libTimeMachine/.theos postinst prerm preferenceloader-bundle/.theos snapshotcheck setTimeMachine/.theos TimeMachine/.theos
 
 install:
 	scp com.michael.TimeMachine_$(VERSION)_iphoneos-arm.deb root@$(THEOS_DEVICE_IP):/tmp/_theos_install.deb

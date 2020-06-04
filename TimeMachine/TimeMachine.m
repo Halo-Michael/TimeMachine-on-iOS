@@ -34,7 +34,7 @@ int do_timemachine(const char *vol) {
         char cre_snapshot[100];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
-        do_create(vol, cre_snapshot);
+        snapshot_create(vol, cre_snapshot);
     }
 
     int dirfd = open(vol, O_RDONLY, 0);
@@ -86,7 +86,7 @@ int do_timemachine(const char *vol) {
     if ([snapshots count] > max_snapshot) {
         while ([snapshots count] > max_snapshot) {
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
-            do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+            snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
             [snapshots removeObjectAtIndex:0];
         }
     } else {

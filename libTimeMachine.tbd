@@ -7,5 +7,5 @@ current-version:       0
 compatibility-version: 0
 exports:
   - archs:              [ arm64, arm64e ]
-    symbols:            [ _do_create, _do_check, _do_delete, _do_rename, _run_system, _modifyPlist ]
+    symbols:            [ _do_check, _run_system, _snapshot_create, _snapshot_check, _snapshot_delete, _snapshot_rename, _modifyPlist ]
 ...

@@ -110,7 +110,7 @@ int do_timemachine(const char *vol) {
     if ([snapshots count] > max_snapshot) {
         while ([snapshots count] > max_snapshot) {
             printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
-            do_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+            snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
             [snapshots removeObjectAtIndex:0];
         }
     } else {
