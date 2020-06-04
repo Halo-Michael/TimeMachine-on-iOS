@@ -9,7 +9,7 @@ all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck s
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
-	mv postinst preinst prerm com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
+	mv postinst prerm com.michael.TimeMachine_$(VERSION)_iphoneos-arm/DEBIAN
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm/etc
 	mkdir com.michael.TimeMachine_$(VERSION)_iphoneos-arm/etc/rc.d
 	mv snapshotcheck com.michael.TimeMachine_$(VERSION)_iphoneos-arm/etc/rc.d
