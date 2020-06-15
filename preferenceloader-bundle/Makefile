@@ -1,7 +1,7 @@
 export ARCHS = arm64 arm64e
 export TARGET = iphone:clang:13.0:10.3
 export CFLAGS = -fobjc-arc
-export LDFLAGS = -F$(THEOS)/frameworks
+export LDFLAGS = -F${THEOS}/frameworks
 export DEBUG = 0
 export GO_EASY_ON_ME = 1
 

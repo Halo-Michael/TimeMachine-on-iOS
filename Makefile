@@ -1,6 +1,6 @@
 TARGET = TimeMachine-on-iOS
 VERSION = 0.9.2
-CC = xcrun -sdk iphoneos clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
+CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
 
 .PHONY: all clean

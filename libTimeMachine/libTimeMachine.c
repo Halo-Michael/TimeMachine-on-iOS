@@ -1,6 +1,5 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/snapshot.h>
-int system(const char *);
 
 int do_check(const char *num) {
     if (strcmp(num, "0") == 0) {
