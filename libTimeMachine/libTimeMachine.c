@@ -114,7 +114,7 @@ int snapshot_rename(const char *vol, const char *snap, const char *nw) {
 void run_system(const char *cmd) {
     int status = system(cmd);
     if (WEXITSTATUS(status) != 0) {
-        printf("Error in command: \"%s\"\n", cmd);
+        perror(cmd);
         exit(WEXITSTATUS(status));
     }
 }

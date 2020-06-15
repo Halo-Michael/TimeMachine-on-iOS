@@ -163,15 +163,9 @@ int main(int argc, char **argv) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
 
     if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
-        FILE *fp = fopen("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist","a+");
-        fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-        fprintf(fp, "<plist version=\"1.0\">\n");
-        fprintf(fp, "<dict>\n");
-        fprintf(fp, "</dict>\n");
-        fprintf(fp, "</plist>\n");
-        fclose(fp);
+        [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
     }
+
     if (strcmp(filesystem, "/") == 0) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });

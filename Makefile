@@ -1,5 +1,5 @@
 TARGET = TimeMachine-on-iOS
-VERSION = 0.9.1
+VERSION = 0.9.2
 CC = xcrun -sdk iphoneos clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
 
@@ -31,31 +31,31 @@ all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck s
 	dpkg -b com.michael.TimeMachine_$(VERSION)_iphoneos-arm
 
 libTimeMachine: clean
-	sh make-libTimeMachine.sh
+	cd libTimeMachine && make
 
-postinst: clean
-	$(CC) postinst.c -o postinst -framework CoreFoundation libTimeMachine.tbd
+postinst: libTimeMachine
+	$(CC) postinst.c -o postinst -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip postinst
 	$(LDID) -Sentitlements.xml postinst
 
-prerm: clean
-	$(CC) prerm.c -o prerm -framework CoreFoundation libTimeMachine.tbd
+prerm: libTimeMachine
+	$(CC) prerm.c -o prerm -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip prerm
 	$(LDID) -Sentitlements-apfs.xml prerm
 
-snapshotcheck: clean
-	$(CC) snapshotcheck.c -o snapshotcheck -framework CoreFoundation libTimeMachine.tbd
+snapshotcheck: libTimeMachine
+	$(CC) snapshotcheck.c -o snapshotcheck -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
 preferenceloader-bundle: clean
-	sh make-preferenceloader-bundle.sh
+	cd preferenceloader-bundle && make
 
-setTimeMachine: clean
-	sh make-setTimeMachine.sh
+setTimeMachine: libTimeMachine
+	cd setTimeMachine && make
 
-TimeMachine: clean
-	sh make-TimeMachine.sh
+TimeMachine: libTimeMachine
+	cd TimeMachine && make
 
 clean:
 	rm -rf com.michael.TimeMachine_* libTimeMachine/.theos postinst prerm preferenceloader-bundle/.theos snapshotcheck setTimeMachine/.theos TimeMachine/.theos
