@@ -1,5 +1,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/snapshot.h>
+int system(const char *);
 
 int do_check(const char *num) {
     if (strcmp(num, "0") == 0) {
@@ -111,10 +112,10 @@ int snapshot_rename(const char *vol, const char *snap, const char *nw) {
     return ret;
 }
 
-void run_system(const char *cmd) {
+int run_system(const char *cmd) {
     int status = system(cmd);
     if (WEXITSTATUS(status) != 0) {
         perror(cmd);
-        exit(WEXITSTATUS(status));
     }
+    return WEXITSTATUS(status);
 }
