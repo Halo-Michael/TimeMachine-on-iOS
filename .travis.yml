@@ -13,3 +13,16 @@ before_install:
   
 script:
   - make all
+
+before_deploy:
+  - git config --local user.name "Halo-Michael"
+  - git config --local user.email "yc992147156@me.com"
+  - git tag "0.9.3-g$(git log --format=%h -1)"
+  - mv com.michael.TimeMachine_*_iphoneos-arm.deb com.michael.TimeMachine_0.9.3-g$(git log --format=%h -1)_iphoneos-arm.deb
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "XRDkUcFrmxlkSJcUQaTGIay/1PQd8k9AD5NE94ELsLD3TSIlZgi3TowGscIFH0gRmIhxmTVa7CexEQ8QveTQAjFe4JBCizs0groaj0lQ004yVQ8Dp2fuBO3vS1g6f/ij/2bDxa1cTylNoM9uFsEpM5h6F3aAFBF06oLYqo/6YDYlb8tgl9XnP3lHbj+fCblClFO09PU9aX+hUY+YiYz0Z7nAXcCdPf9b2LlUfAD33GFzzKvP787mIHc7uVu76qYVpi2BJCs1li4PTnJ0eIkj+IR2Z3vZxAscQfNr+em2Z78PfX311XjhaQ7Mu1+NWKFMVV//YtyG4tgScLdvy6hImldzTqvsnhzAhKkp5UE/9ITXQjTBJxYFvrzzpapt4+Qk4wuRBUJXEVXDKN1rUugKn87QQkX1BTauZsIMDLiwKWi1ck9P8E8qOT6am5GHJXWjc0pqobKG3dK7CRArZvh9b7hw8+iAEDPccAsE4WLEW3UqM+a57+MTov1e+PI5gS23ytd54x9gZOo31K7vxdPwGbrldZtnTUfQ7uMW7FuHkPEVFGIxTXE5jc1CqYDowmlw0O7Ed16brlFGAdHQKlr5hpeTsZOHEYWIDn34eCW9g7s/Wfe9FBTIZib1wwDVtxuSG48iWQIpCgachwoMrBjLcwwYNz8FPXSNbTAqzIPzMt8="
+  file: "com.michael.TimeMachine_0.9.3-g$(git log --format=%h -1)_iphoneos-arm.deb"
+  skip_cleanup: true
