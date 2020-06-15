@@ -1,4 +1,4 @@
-#import <Preferences/Preferences.h>
+#import "Preferences.h"
 #import "common.h"
 
 @interface SKSharedHelper : NSObject

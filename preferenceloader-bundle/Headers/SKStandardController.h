@@ -1,4 +1,4 @@
-#import <Preferences/Preferences.h>
+#import "Preferences.h"
 #import "SKTintedListController.h"
 #import "SKListControllerProtocol.h"
 #import <MessageUI/MFMailComposeViewController.h>

@@ -1,4 +1,4 @@
-#import <Preferences/Preferences.h>
+#import "Preferences.h"
 
 #define SK_LCL(str) [self localizedString:str]
 
