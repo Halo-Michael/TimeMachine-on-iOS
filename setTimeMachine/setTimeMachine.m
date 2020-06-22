@@ -167,13 +167,13 @@ int main(int argc, char **argv) {
     }
 
     NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
+    NSError *error = nil;
+    NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
+    if (error) {
+        usage();
+        return 1;
+    }
     if ([fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeSymbolicLink"]) {
-        NSError *error = nil;
-        NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
-        if (error) {
-            usage();
-            return 1;
-        }
         if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:filePath]) {
             usage();
             return 2;
