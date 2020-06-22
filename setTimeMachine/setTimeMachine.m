@@ -44,7 +44,7 @@ void showSettings() {
 int do_timemachine(const char *vol) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
+    if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0) {
         perror("what?");
         exit(1);
     }
@@ -74,7 +74,7 @@ int do_timemachine(const char *vol) {
         if (strcmp(vol, "/") == 0) {
             max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
         }
-        if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
+        if (strcmp(vol, "/private/var") == 0) {
             max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
         }
     }
@@ -166,7 +166,29 @@ int main(int argc, char **argv) {
         [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
     }
 
-    if (strcmp(filesystem, "/") == 0) {
+    NSError *error = nil;
+    NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
+    NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
+    if (error) {
+        usage();
+        return 1;
+    }
+    if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:filePath]) {
+        usage();
+        return 2;
+    }
+    filePath = [[NSFileManager defaultManager] currentDirectoryPath];
+    [[NSFileManager defaultManager] changeCurrentDirectoryPath:NSHomeDirectory()];
+    fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
+    if (error) {
+        usage();
+        return 2;
+    }
+    if (![fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeDirectory"]) {
+        usage();
+        return 3;
+    }
+    if ([filePath isEqualToString:@"/"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", number);
@@ -176,7 +198,7 @@ int main(int argc, char **argv) {
             printf("There is nothing to do.\n");
         }
         printf("Now exit.\n");
-    } else if (strcmp(filesystem, "/var") == 0 || strcmp(filesystem, "/var/") == 0 || strcmp(filesystem, "/private/var") == 0 || strcmp(filesystem, "/private/var/") == 0) {
+    } else if ([filePath isEqualToString:@"/private/var"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", number);

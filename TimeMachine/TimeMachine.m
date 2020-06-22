@@ -6,7 +6,7 @@
 int do_timemachine(const char *vol) {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0 && strcmp(vol, "/var") != 0) {
+    if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0) {
         perror("what?");
         exit(1);
     }
@@ -18,7 +18,7 @@ int do_timemachine(const char *vol) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
             }
         }
-        if (strcmp(vol, "/private/var") == 0 || strcmp(vol, "/var") == 0) {
+        if (strcmp(vol, "/private/var") == 0) {
             if (settings[@"max_datafs_snapshot"]) {
                 max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
             }
