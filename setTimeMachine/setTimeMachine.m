@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
         [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
     }
 
+    NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
     if ([fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeSymbolicLink"]) {
         NSError *error = nil;
-        NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
         NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
         if (error) {
             usage();
