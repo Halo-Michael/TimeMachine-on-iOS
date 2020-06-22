@@ -166,23 +166,25 @@ int main(int argc, char **argv) {
         [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
     }
 
-    NSError *error = nil;
-    NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
-    NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
-    if (error) {
-        usage();
-        return 1;
-    }
-    if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:filePath]) {
-        usage();
-        return 2;
-    }
-    filePath = [[NSFileManager defaultManager] currentDirectoryPath];
-    [[NSFileManager defaultManager] changeCurrentDirectoryPath:NSHomeDirectory()];
-    fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
-    if (error) {
-        usage();
-        return 2;
+    if ([fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeSymbolicLink"]) {
+        NSError *error = nil;
+        NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
+        NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
+        if (error) {
+            usage();
+            return 1;
+        }
+        if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:filePath]) {
+            usage();
+            return 2;
+        }
+        filePath = [[NSFileManager defaultManager] currentDirectoryPath];
+        [[NSFileManager defaultManager] changeCurrentDirectoryPath:NSHomeDirectory()];
+        fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
+        if (error) {
+            usage();
+            return 2;
+        }
     }
     if (![fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeDirectory"]) {
         usage();
