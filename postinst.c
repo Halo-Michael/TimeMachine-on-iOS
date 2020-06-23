@@ -1,4 +1,5 @@
 #include <CoreFoundation/CoreFoundation.h>
+#include <sys/stat.h>
 #include "utils.h"
 
 int main() {
@@ -24,13 +25,14 @@ int main() {
         return 1;
     }
 
-    run_system("chown root:wheel /etc/rc.d/snapshotcheck");
-    run_system("chmod 6755 /etc/rc.d/snapshotcheck");
-    run_system("chown root:wheel /Library/LaunchDaemons/com.michael.TimeMachine.plist");
-    run_system("chown root:wheel /usr/libexec/TimeMachine");
-    run_system("chmod 6755 /usr/libexec/TimeMachine");
-    run_system("chown root:wheel /usr/bin/setTimeMachine");
-    run_system("chmod 6755 /usr/bin/setTimeMachine");
+    chown("/etc/rc.d/snapshotcheck", 0, 0);
+    chmod("/etc/rc.d/snapshotcheck", 06755);
+    chown("/Library/LaunchDaemons/com.michael.TimeMachine.plist", 0, 0);
+    chown("/usr/libexec/TimeMachine", 0, 0);
+    chmod("/usr/libexec/TimeMachine", 06755);
+    chown("/usr/bin/setTimeMachine", 0, 0);
+    chmod("/usr/bin/setTimeMachine", 06755);
+
     run_system("launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist");
     return 0;
 }
