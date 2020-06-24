@@ -167,6 +167,9 @@ int main(int argc, char **argv) {
     }
 
     NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
+    while ([filePath characterAtIndex:([filePath length] - 1)] == '/' && [filePath length] != 1) {
+        filePath = [filePath substringToIndex:([filePath length] - 1)];
+    }
     NSError *error = nil;
     NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
     if (error) {
@@ -174,12 +177,13 @@ int main(int argc, char **argv) {
         return 1;
     }
     if ([fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeSymbolicLink"]) {
-        if (![[NSFileManager defaultManager] changeCurrentDirectoryPath:filePath]) {
+        char realPath[1024];
+        realpath([filePath UTF8String], realPath);
+        if (strlen(realPath) == 0) {
             usage();
             return 2;
         }
-        filePath = [[NSFileManager defaultManager] currentDirectoryPath];
-        [[NSFileManager defaultManager] changeCurrentDirectoryPath:NSHomeDirectory()];
+        filePath = [NSString stringWithFormat:@"%s", realPath];
         fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
         if (error) {
             usage();
