@@ -12,15 +12,20 @@ int do_timemachine(const char *vol) {
     }
 
     int max_snapshot = 3;
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) == 0) {
-        if (strcmp(vol, "/") == 0) {
-            if (settings[@"max_rootfs_snapshot"]) {
-                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+    bool isDirectory;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
+        if (isDirectory) {
+            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+        } else {
+            if (strcmp(vol, "/") == 0) {
+                if (settings[@"max_rootfs_snapshot"]) {
+                    max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                }
             }
-        }
-        if (strcmp(vol, "/private/var") == 0) {
-            if (settings[@"max_datafs_snapshot"]) {
-                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            if (strcmp(vol, "/private/var") == 0) {
+                if (settings[@"max_datafs_snapshot"]) {
+                    max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+                }
             }
         }
     }
@@ -31,7 +36,7 @@ int do_timemachine(const char *vol) {
         struct tm *tmTime;
         tmTime = localtime(&time_T);
         char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
-        char cre_snapshot[100];
+        char cre_snapshot[2048];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
         snapshot_create(vol, cre_snapshot);

@@ -13,30 +13,37 @@ void usage() {
 void showSettings() {
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
     NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
+    bool isDirectory;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
         printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
         printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
     } else {
-        int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
-        if (settings [@"max_rootfs_snapshot"]) {
-            max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-            if (max_rootfs_snapshot != 0) {
-                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
-            } else {
-                printf("Won't save snapshot for rootfs\n");
-            }
-        } else {
+        if (isDirectory) {
+            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
             printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-        }
-        if (settings [@"max_datafs_snapshot"]) {
-            max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-            if (max_datafs_snapshot != 0) {
-                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
-            } else {
-                printf("Won't save snapshot for datafs\n");
-            }
-        } else {
             printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+        } else {
+            int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
+            if (settings [@"max_rootfs_snapshot"]) {
+                max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                if (max_rootfs_snapshot != 0) {
+                    printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+                } else {
+                    printf("Won't save snapshot for rootfs\n");
+                }
+            } else {
+                printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+            }
+            if (settings [@"max_datafs_snapshot"]) {
+                max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+                if (max_datafs_snapshot != 0) {
+                    printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+                } else {
+                    printf("Won't save snapshot for datafs\n");
+                }
+            } else {
+                printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+            }
         }
     }
 }
@@ -68,14 +75,20 @@ int do_timemachine(const char *vol) {
 
     char *p = &abuf[0];
     int max_snapshot = 0;
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
+    bool isDirectory;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
         max_snapshot = 3;
     } else {
-        if (strcmp(vol, "/") == 0) {
-            max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-        }
-        if (strcmp(vol, "/private/var") == 0) {
-            max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+        if (isDirectory) {
+            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+            max_snapshot = 3;
+        } else {
+            if (strcmp(vol, "/") == 0) {
+                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            }
+            if (strcmp(vol, "/private/var") == 0) {
+                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            }
         }
     }
 
@@ -162,8 +175,13 @@ int main(int argc, char **argv) {
 
     NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
 
-    if (access("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", F_OK) != 0) {
+    bool isDirectory;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
         [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
+    } else {
+        if (isDirectory) {
+            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+        }
     }
 
     NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
@@ -177,7 +195,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     if ([fileInfo[@"NSFileType"] isEqualToString:@"NSFileTypeSymbolicLink"]) {
-        char realPath[1024];
+        char realPath[2048];
         realpath([filePath UTF8String], realPath);
         if (strlen(realPath) == 0) {
             usage();
