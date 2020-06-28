@@ -181,6 +181,7 @@ int main(int argc, char **argv) {
     } else {
         if (isDirectory) {
             remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+            [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
         }
     }
 
