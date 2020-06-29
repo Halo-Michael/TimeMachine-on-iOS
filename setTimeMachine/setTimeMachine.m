@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    NSString *filePath = [NSString stringWithFormat:@"%s", filesystem];
+    NSString *filePath = [[NSString alloc] initWithUTF8String:filesystem];
     while ([filePath characterAtIndex:([filePath length] - 1)] == '/' && [filePath length] != 1) {
         filePath = [filePath substringToIndex:([filePath length] - 1)];
     }
@@ -217,23 +217,18 @@ int main(int argc, char **argv) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", number);
-        if (do_timemachine("/") == 0) {
-            printf("Successfully delete the extra snapshot.\n");
-        } else {
-            printf("There is nothing to do.\n");
-        }
     } else if ([filePath isEqualToString:@"/private/var"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
         printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", number);
-        if (do_timemachine("/private/var") == 0) {
-            printf("Successfully delete the extra snapshot.\n");
-        } else {
-            printf("There is nothing to do.\n");
-        }
     } else {
         usage();
         return 1;
+    }
+    if (do_timemachine([filePath UTF8String]) == 0) {
+        printf("Successfully delete the extra snapshot.\n");
+    } else {
+        printf("There is nothing to do.\n");
     }
     run_system("killall -9 cfprefsd");
     printf("Now exit.\n");
