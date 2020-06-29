@@ -222,7 +222,6 @@ int main(int argc, char **argv) {
         } else {
             printf("There is nothing to do.\n");
         }
-        printf("Now exit.\n");
     } else if ([filePath isEqualToString:@"/private/var"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
@@ -232,10 +231,12 @@ int main(int argc, char **argv) {
         } else {
             printf("There is nothing to do.\n");
         }
-        printf("Now exit.\n");
     } else {
         usage();
         return 1;
     }
+    run_system("killall -9 cfprefsd");
+    printf("Now exit.\n");
+
     return 0;
 }

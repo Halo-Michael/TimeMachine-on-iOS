@@ -8,7 +8,7 @@ $(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
 $(BUNDLE_NAME)_CFLAGS = -fobjc-arc
 $(BUNDLE_NAME)_FRAMEWORKS = UIKit MessageUI Social QuartzCore CoreGraphics
 $(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences
-$(BUNDLE_NAME)_LDFLAGS += ./SettingsKit.tbd
+$(BUNDLE_NAME)_LDFLAGS += SettingsKit.tbd
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
