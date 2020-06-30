@@ -36,7 +36,7 @@ int do_timemachine(const char *vol) {
         struct tm *tmTime;
         tmTime = localtime(&time_T);
         char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
-        char cre_snapshot[41];
+        char cre_snapshot[42];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
         snapshot_create(vol, cre_snapshot);
