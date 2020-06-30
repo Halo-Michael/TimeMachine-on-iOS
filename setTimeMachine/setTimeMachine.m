@@ -186,8 +186,8 @@ int main(int argc, char **argv) {
     }
 
     NSString *filePath = [[NSString alloc] initWithUTF8String:filesystem];
-    while ([filePath characterAtIndex:([filePath length] - 1)] == '/' && [filePath length] != 1) {
-        filePath = [filePath substringToIndex:([filePath length] - 1)];
+    while ([filePath characterAtIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)] == '/' && [[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] != 1) {
+        filePath = [filePath substringToIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)];
     }
     NSError *error = nil;
     NSMutableDictionary *fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
