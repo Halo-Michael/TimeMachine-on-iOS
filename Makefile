@@ -50,7 +50,7 @@ snapshotcheck: libTimeMachine
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
-preferenceloader-bundle: clean
+preferenceloader-bundle: libTimeMachine
 	cd preferenceloader-bundle && make
 
 setTimeMachine: libTimeMachine
