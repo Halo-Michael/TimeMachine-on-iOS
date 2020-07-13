@@ -6,7 +6,7 @@ $(BUNDLE_NAME)_FILES = TimeMachineRootListController.m
 $(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
 $(BUNDLE_NAME)_FRAMEWORKS = UIKit
 $(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences
-$(TOOL_NAME)_LDFLAGS += ../libTimeMachine/.theos/obj/libTimeMachine.dylib
+$(BUNDLE_NAME)_LDFLAGS += ../libTimeMachine/.theos/obj/libTimeMachine.dylib
 $(BUNDLE_NAME)_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/bundle.mk
