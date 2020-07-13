@@ -9,8 +9,10 @@ int main(int argc, const char **argv) {
 
     run_system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
 
-    if (strcmp(argv[1], "upgrade") == 0) {
-        return 0;
+    if (argc > 1) {
+        if (strcmp(argv[1], "upgrade") == 0) {
+            return 0;
+        }
     }
 
     if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_11_0) {
