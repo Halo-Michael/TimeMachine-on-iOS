@@ -24,6 +24,11 @@ void showSettings() {
             printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
         } else {
             int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
+            if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+                printf("TimeMachine for rootfs is enabled.\n");
+            } else {
+                printf("TimeMachine for rootfs is disabled.\n");
+            }
             if (settings [@"max_rootfs_snapshot"]) {
                 max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
                 if (max_rootfs_snapshot != 0) {
@@ -33,6 +38,11 @@ void showSettings() {
                 }
             } else {
                 printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+            }
+            if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+                printf("TimeMachine for datafs is enabled.\n");
+            } else {
+                printf("TimeMachine for datafs is disabled.\n");
             }
             if (settings [@"max_datafs_snapshot"]) {
                 max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
@@ -49,8 +59,7 @@ void showSettings() {
 }
 
 int do_timemachine(const char *vol) {
-    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0) {
         perror("what?");
         exit(1);
@@ -158,7 +167,7 @@ int main(int argc, char **argv) {
                 filesystem = optarg;
                 break;
             case 'n':
-                if (do_check(optarg) != 0) {
+                if (!is_number(optarg)) {
                     usage();
                     return 1;
                 } else {
@@ -213,23 +222,40 @@ int main(int argc, char **argv) {
         usage();
         return 3;
     }
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
     if ([filePath isEqualToString:@"/"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs, now delete the extra snapshot.\n", number);
+        printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", number);
+        if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+            printf("Now delete the extra snapshot.\n");
+            if (do_timemachine("/") == 0) {
+                printf("Successfully delete the extra snapshot.\n");
+            } else {
+                printf("There is nothing to do.\n");
+            }
+        } else {
+            printf("TimeMachine for rootfs is disabled.\n");
+        }
     } else if ([filePath isEqualToString:@"/private/var"]) {
         modifyPlist(settingsPlist, ^(id plist) {
         plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for varfs, now delete the extra snapshot.\n", number);
+        printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", number);
+        if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+            printf("Now delete the extra snapshot.\n");
+            if (do_timemachine("/private/var") == 0) {
+                printf("Successfully delete the extra snapshot.\n");
+            } else {
+                printf("There is nothing to do.\n");
+            }
+        } else {
+            printf("TimeMachine for datafs is disabled.\n");
+        }
     } else {
         usage();
         return 1;
     }
-    if (do_timemachine([filePath UTF8String]) == 0) {
-        printf("Successfully delete the extra snapshot.\n");
-    } else {
-        printf("There is nothing to do.\n");
-    }
+
     run_system("killall -9 cfprefsd");
     printf("Now exit.\n");
 

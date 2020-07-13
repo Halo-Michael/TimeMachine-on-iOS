@@ -1,18 +1,15 @@
-export GO_EASY_ON_ME = 1
-
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = TimeMachine
-$(BUNDLE_NAME)_FILES = TimeMachine.mm
-$(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
-$(BUNDLE_NAME)_CFLAGS = -fobjc-arc
-$(BUNDLE_NAME)_FRAMEWORKS = UIKit MessageUI Social QuartzCore CoreGraphics
-$(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences
-$(BUNDLE_NAME)_LDFLAGS += SettingsKit.tbd
+
+TimeMachine_FILES = TimeMachineRootListController.m
+TimeMachine_INSTALL_PATH = /Library/PreferenceBundles
+TimeMachine_FRAMEWORKS = UIKit
+TimeMachine_PRIVATE_FRAMEWORKS = Preferences
+TimeMachine_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
 internal-stage::
-	$(ECHO_NOTHING)cp $(THEOS)/include/SettingsKit/Resources/*.png $(THEOS_STAGING_DIR)/Library/PreferenceBundles/$(BUNDLE_NAME).bundle/$(ECHO_END)
 	$(ECHO_NOTHING)mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences$(ECHO_END)
-	$(ECHO_NOTHING)cp entry.plist $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/$(BUNDLE_NAME).plist$(ECHO_END)
+	$(ECHO_NOTHING)cp entry.plist $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/TimeMachine.plist$(ECHO_END)

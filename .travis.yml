@@ -10,6 +10,6 @@ before_install:
   - brew install ldid dpkg xz
   - export THEOS=/opt/theos
   - sudo git clone --recursive https://github.com/Halo-Michael/theos.git $THEOS
-  
+
 script:
   - make all

@@ -112,9 +112,15 @@ int main() {
 
     run_system("/etc/rc.d/snapshotcheck");
 
-    do_timemachine("/");
-    do_timemachine("/private/var");
-    printf("TimeMachine on iOS's work is down, enjoy safety.\n");
-    printf("\n");
+    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
+
+    if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+        do_timemachine("/");
+    }
+    if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+        do_timemachine("/private/var");
+    }
+
+    printf("TimeMachine on iOS's work is down, enjoy safety.\n\n");
     return 0;
 }

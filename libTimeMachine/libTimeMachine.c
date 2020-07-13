@@ -1,24 +1,24 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/snapshot.h>
 
-int do_check(const char *num) {
+bool is_number(const char *num) {
     if (strcmp(num, "0") == 0) {
-        return 0;
+        return true;
     }
     const char* p = num;
     if (*p < '1' || *p > '9') {
-        return 1;
+        return false;
     } else {
         p++;
     }
     while (*p) {
         if(*p < '0' || *p > '9') {
-            return 1;
+            return false;
         } else {
             p++;
         }
     }
-    return 0;
+    return true;
 }
 
 int snapshot_create(const char *vol, const char *snap) {
