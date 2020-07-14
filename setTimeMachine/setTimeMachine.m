@@ -5,12 +5,10 @@
 
 void usage() {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
-    printf("\t-h\n");
-    printf("\tPrint this help.\n");
+    printf("\t-h\tPrint this help.\n");
     printf("\t-f <vol> [--enable | --disable] [-n <number>]\n");
-    printf("\tSet a way to backup snapshots for specify filesystem.\n");
-    printf("\t-s\n");
-    printf("\tShow current settings.\n");
+    printf("\t\tSet a way to backup snapshots for specify filesystem.\n");
+    printf("\t-s\tShow current settings.\n");
 }
 
 void showSettings() {
