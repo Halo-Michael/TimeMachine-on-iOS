@@ -1,6 +1,6 @@
 export TARGET = iphone:clang:13.0:10.3
 export ARCHS = arm64 arm64e
-export VERSION = 0.10.2
+export VERSION = 0.10.3
 export DEBUG = no
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
@@ -36,7 +36,7 @@ libTimeMachine: clean
 	cd libTimeMachine && make
 
 postinst: libTimeMachine
-	$(CC) postinst.c -o postinst -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
+	$(CC) -fobjc-arc postinst.m -o postinst -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip postinst
 	$(LDID) -Sentitlements-apfs.xml postinst
 

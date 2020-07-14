@@ -19,12 +19,26 @@ int do_timemachine(const char *vol) {
         } else {
             if (strcmp(vol, "/") == 0) {
                 if (settings[@"max_rootfs_snapshot"]) {
-                    max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
+                        max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                    } else {
+                        modifyPlist(settingsPlist, ^(id plist) {
+                            plist[@"max_rootfs_snapshot"] = nil;
+                        });
+                        run_system("killall -9 cfprefsd");
+                    }
                 }
             }
             if (strcmp(vol, "/private/var") == 0) {
                 if (settings[@"max_datafs_snapshot"]) {
-                    max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
+                        max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+                    } else {
+                        modifyPlist(settingsPlist, ^(id plist) {
+                            plist[@"max_datafs_snapshot"] = nil;
+                        });
+                        run_system("killall -9 cfprefsd");
+                    }
                 }
             }
         }
