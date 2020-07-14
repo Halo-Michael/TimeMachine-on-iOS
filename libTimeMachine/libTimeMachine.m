@@ -1,4 +1,4 @@
-#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
 #import <regex.h>
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {

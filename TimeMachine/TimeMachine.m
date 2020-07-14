@@ -1,4 +1,4 @@
-#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
 #import <regex.h>
 #import <sys/snapshot.h>
 #import "../utils.h"

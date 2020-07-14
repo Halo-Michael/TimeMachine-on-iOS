@@ -1,13 +1,16 @@
-#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
 #import <regex.h>
 #import <sys/snapshot.h>
 #import "../utils.h"
 
 void usage() {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
-    printf("\t-h\t\t\tPrint this help.\n");
-    printf("\t-f <vol> -n <num>\tSet the max number of snapshots that need to be backed up for rootfs/datafs.\n");
-    printf("\t-s\t\t\tShow current settings.\n");
+    printf("\t-h\n");
+    printf("\tPrint this help.\n");
+    printf("\t-f <vol> [--enable | --disable] [-n <number>]\n");
+    printf("\tSet a way to backup snapshots for specify filesystem.\n");
+    printf("\t-s\n");
+    printf("\tShow current settings.\n");
 }
 
 void showSettings() {
@@ -151,33 +154,36 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    int c;
-    char *filesystem = NULL, *number = NULL;
-    while ((c = getopt(argc, argv, "f:hn:s")) != -1) {
-        switch (c) {
-            case 'h':
-                usage();
-                return 0;
-                break;
-            case 's':
-                showSettings();
-                return 0;
-                break;
-            case 'f':
-                filesystem = optarg;
-                break;
-            case 'n':
-                if (!is_number(optarg)) {
-                    usage();
-                    return 1;
-                } else {
-                    number = optarg;
-                }
-                break;
+    NSMutableArray *args = [NSMutableArray array];
+    for (int i = 1; i < argc; i++) {
+        [args addObject:[[NSString alloc] initWithUTF8String:argv[i]]];
+    }
+    
+    if ([args containsObject:@"-h"]) {
+        usage();
+        return 0;
+    }
+    if ([args containsObject:@"-s"]) {
+        showSettings();
+        return 0;
+    }
+    NSString *filePath = nil, *number = nil;
+    if ([args containsObject:@"-f"]) {
+        filePath = [args objectAtIndex:([args indexOfObject:@"-f"] + 1)];
+    } else {
+        usage();
+        return 1;
+    }
+    if ([args containsObject:@"-n"]) {
+        if (is_number([[args objectAtIndex:([args indexOfObject:@"-n"] + 1)] UTF8String])) {
+            number = [args objectAtIndex:([args indexOfObject:@"-n"] + 1)];
+        } else {
+            usage();
+            return 1;
         }
     }
 
-    if (filesystem == NULL || number == NULL) {
+    if (number == nil && ![args containsObject:@"--enable"] && ![args containsObject:@"--disable"]) {
         usage();
         return 1;
     }
@@ -194,7 +200,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    NSString *filePath = [[NSString alloc] initWithUTF8String:filesystem];
     while ([filePath characterAtIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)] == '/' && [[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] != 1) {
         filePath = [filePath substringToIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)];
     }
@@ -222,34 +227,63 @@ int main(int argc, char **argv) {
         usage();
         return 3;
     }
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
     if ([filePath isEqualToString:@"/"]) {
-        modifyPlist(settingsPlist, ^(id plist) {
-        plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", number);
-        if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
-            printf("Now delete the extra snapshot.\n");
-            if (do_timemachine("/") == 0) {
-                printf("Successfully delete the extra snapshot.\n");
+        if ([args containsObject:@"--enable"]) {
+            printf("Will enable TimeMachine for rootfs.\n");
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"rootfs_enabled"] = @YES;
+            });
+        } else if ([args containsObject:@"--disable"]) {
+            printf("Will disable TimeMachine for rootfs.\n");
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"rootfs_enabled"] = @NO;
+            });
+        }
+        if (number != nil) {
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[number integerValue]];
+            });
+            printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", [number UTF8String]);
+            NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
+            if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+                printf("Now delete the extra snapshot.\n");
+                if (do_timemachine("/") == 0) {
+                    printf("Successfully delete the extra snapshot.\n");
+                } else {
+                    printf("There is nothing to do.\n");
+                }
             } else {
-                printf("There is nothing to do.\n");
+                printf("TimeMachine for rootfs is disabled.\n");
             }
-        } else {
-            printf("TimeMachine for rootfs is disabled.\n");
         }
     } else if ([filePath isEqualToString:@"/private/var"]) {
-        modifyPlist(settingsPlist, ^(id plist) {
-        plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", number] integerValue]]; });
-        printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", number);
-        if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
-            printf("Now delete the extra snapshot.\n");
-            if (do_timemachine("/private/var") == 0) {
-                printf("Successfully delete the extra snapshot.\n");
+        if ([args containsObject:@"--enable"]) {
+            printf("Will enable TimeMachine for datafs.\n");
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"datafs_enabled"] = @YES;
+            });
+        } else if ([args containsObject:@"--disable"]) {
+            printf("Will disable TimeMachine for datafs.\n");
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"datafs_enabled"] = @NO;
+            });
+        }
+        if (number != nil) {
+            modifyPlist(settingsPlist, ^(id plist) {
+                plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[number integerValue]];
+            });
+            printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", [number UTF8String]);
+            NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
+            if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+                printf("Now delete the extra snapshot.\n");
+                if (do_timemachine("/private/var") == 0) {
+                    printf("Successfully delete the extra snapshot.\n");
+                } else {
+                    printf("There is nothing to do.\n");
+                }
             } else {
-                printf("There is nothing to do.\n");
+                printf("TimeMachine for datafs is disabled.\n");
             }
-        } else {
-            printf("TimeMachine for datafs is disabled.\n");
         }
     } else {
         usage();
