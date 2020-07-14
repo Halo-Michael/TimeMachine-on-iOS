@@ -10,7 +10,7 @@
 			<key>label</key>
 			<string>Time</string>
 			<key>footerText</key>
-			<string>Set a time to backup snapshots(24-hour system)</string>
+			<string>Set a time to backup snapshots (24-hour system)</string>
 		</dict>
 		<dict>
 			<key>cell</key>
