@@ -10,11 +10,11 @@ int main() {
 
     if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_11_0) {
         printf("iOS11 or higher version detected, now checking orig snapshot...\n");
-        if (snapshot_check("/", "orig-fs") == 1) {
+        if (snapshot_check("/", "orig-fs")) {
             printf("Will rename snapshot \"orig-fs\" on fs / to \"com.apple.TimeMachine.orig-fs\"\n");
             snapshot_rename("/", "orig-fs", "com.apple.TimeMachine.orig-fs");
         }
-        if (snapshot_check("/", "electra-prejailbreak") == 1) {
+        if (snapshot_check("/", "electra-prejailbreak")) {
             printf("Will rename snapshot \"electra-prejailbreak\" on fs / to \"com.apple.TimeMachine.electra-prejailbreak\"\n");
             snapshot_rename("/", "electra-prejailbreak", "com.apple.TimeMachine.electra-prejailbreak");
         }

@@ -19,8 +19,6 @@
 			<string>Hour</string>
 			<key>defaults</key>
 			<string>com.michael.TimeMachine</string>
-			<key>isContinuous</key>
-			<false/>
 			<key>isSegmented</key>
 			<true/>
 			<key>key</key>
@@ -41,8 +39,6 @@
 			<string>Minute</string>
 			<key>defaults</key>
 			<string>com.michael.TimeMachine</string>
-			<key>isContinuous</key>
-			<false/>
 			<key>isSegmented</key>
 			<true/>
 			<key>key</key>

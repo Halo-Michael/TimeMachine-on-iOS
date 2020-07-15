@@ -35,14 +35,14 @@ int snapshot_create(const char *vol, const char *snap) {
     } else {
         printf("Success\n");
     }
-    return (ret);
+    return ret;
 }
 
-int snapshot_check(const char *vol, const char *snap) {
+bool snapshot_check(const char *vol, const char *snap) {
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
-        return 1;
+        exit(1);
     }
 
     struct attrlist alist = { 0 };
@@ -53,7 +53,7 @@ int snapshot_check(const char *vol, const char *snap) {
     int count = fs_snapshot_list(dirfd, &alist, &abuf[0], sizeof (abuf), 0);
     if (count < 0) {
         perror("fs_snapshot_list");
-        return 1;
+        exit(1);
     }
     
     char *p = &abuf[0];
@@ -69,12 +69,12 @@ int snapshot_check(const char *vol, const char *snap) {
             char *name = field + ar.attr_dataoffset;
             field += sizeof (attrreference_t);
             if (strcmp(name, snap) == 0) {
-                return 1;
+                return true;
             }
         }
         p += len;
     }
-    return 0;
+    return false;
 }
 
 int snapshot_delete(const char *vol, const char *snap) {

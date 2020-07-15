@@ -17,7 +17,7 @@ bool modifyPlist(NSString *filename, void (^function)(id));
 
 bool is_number(const char *num);
 int snapshot_create(const char *vol, const char *snap);
-int snapshot_check(const char *vol, const char *snap);
+bool snapshot_check(const char *vol, const char *snap);
 int snapshot_delete(const char *vol, const char *snap);
 int snapshot_rename(const char *vol, const char *snap, const char *nw);
 void run_system(const char *cmd);
