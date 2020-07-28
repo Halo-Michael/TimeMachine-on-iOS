@@ -11,7 +11,11 @@
 
 #ifdef __OBJC__
 
+#import "libTimeMachine/libTimeMachine.h"
+
+NSDictionary *loadPrefs();
 bool modifyPlist(NSString *filename, void (^function)(id));
+CFNumberRef newInt(int value);
 
 #endif
 

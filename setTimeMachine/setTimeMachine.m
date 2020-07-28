@@ -16,71 +16,52 @@ void usage() {
 void showSettings() {
     NSDictionary *const launchdSettings = [NSDictionary dictionaryWithContentsOfFile:@"/Library/LaunchDaemons/com.michael.TimeMachine.plist"];
     printf("Will backup snapshots at %d:%d.\n", [launchdSettings[@"StartCalendarInterval"][@"Hour"] intValue], [launchdSettings[@"StartCalendarInterval"][@"Minute"] intValue]);
-    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    bool isDirectory;
-    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
-        printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-        printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+    NSDictionary *const settings = loadPrefs();
+    int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
+    if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+        printf("TimeMachine for rootfs is enabled.\n");
     } else {
-        if (isDirectory) {
-            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+        printf("TimeMachine for rootfs is disabled.\n");
+    }
+    if (settings[@"max_rootfs_snapshot"]) {
+        if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
+            max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            if (max_rootfs_snapshot != 0) {
+                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+            } else {
+                printf("Won't save snapshot for rootfs\n");
+            }
         } else {
-            int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
-            if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
-                printf("TimeMachine for rootfs is enabled.\n");
-            } else {
-                printf("TimeMachine for rootfs is disabled.\n");
-            }
-            if (settings[@"max_rootfs_snapshot"]) {
-                if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                    max_rootfs_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-                    if (max_rootfs_snapshot != 0) {
-                        printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
-                    } else {
-                        printf("Won't save snapshot for rootfs\n");
-                    }
-                } else {
-                    modifyPlist(settingsPlist, ^(id plist) {
-                        plist[@"max_rootfs_snapshot"] = nil;
-                    });
-                    run_system("killall -9 cfprefsd");
-                    printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-                }
-            } else {
-                printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
-            }
-            if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
-                printf("TimeMachine for datafs is enabled.\n");
-            } else {
-                printf("TimeMachine for datafs is disabled.\n");
-            }
-            if (settings[@"max_datafs_snapshot"]) {
-                if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                    max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-                    if (max_datafs_snapshot != 0) {
-                        printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
-                    } else {
-                        printf("Won't save snapshot for datafs\n");
-                    }
-                } else {
-                    modifyPlist(settingsPlist, ^(id plist) {
-                        plist[@"max_datafs_snapshot"] = nil;
-                    });
-                    run_system("killall -9 cfprefsd");
-                    printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
-                }
-            } else {
-                printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
-            }
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
         }
+    } else {
+        printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+    }
+    if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+        printf("TimeMachine for datafs is enabled.\n");
+    } else {
+        printf("TimeMachine for datafs is disabled.\n");
+    }
+    if (settings[@"max_datafs_snapshot"]) {
+        if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
+            max_datafs_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            if (max_datafs_snapshot != 0) {
+                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+            } else {
+                printf("Won't save snapshot for datafs\n");
+            }
+        } else {
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+        }
+    } else {
+        printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
     }
 }
 
 int do_timemachine(const char *vol) {
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
+    NSDictionary *const settings = loadPrefs();
     if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0) {
         perror("what?");
         exit(1);
@@ -104,22 +85,11 @@ int do_timemachine(const char *vol) {
     }
 
     char *p = &abuf[0];
-    int max_snapshot = 0;
-    bool isDirectory;
-    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
-        max_snapshot = 3;
-    } else {
-        if (isDirectory) {
-            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-            max_snapshot = 3;
-        } else {
-            if (strcmp(vol, "/") == 0) {
-                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-            }
-            if (strcmp(vol, "/private/var") == 0) {
-                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-            }
-        }
+    int max_snapshot = 3;
+    if (strcmp(vol, "/") == 0) {
+        max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+    } else if (strcmp(vol, "/private/var") == 0) {
+        max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
     }
 
     NSMutableArray *snapshots = [NSMutableArray array];
@@ -184,18 +154,6 @@ int f(int argc, char **argv, NSArray *args) {
         return 1;
     }
 
-    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-
-    bool isDirectory;
-    if (![[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
-        [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
-    } else {
-        if (isDirectory) {
-            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-            [[NSDictionary dictionary] writeToFile:settingsPlist atomically:NO];
-        }
-    }
-
     while ([filePath characterAtIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)] == '/' && [[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] != 1) {
         filePath = [filePath substringToIndex:([[NSNumber numberWithUnsignedInteger:[filePath length]] intValue] - 1)];
     }
@@ -226,22 +184,13 @@ int f(int argc, char **argv, NSArray *args) {
     if ([filePath isEqualToString:@"/"]) {
         if ([args containsObject:@"--enable"]) {
             printf("Will enable TimeMachine for rootfs.\n");
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"rootfs_enabled"] = @YES;
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanTrue, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         } else if ([args containsObject:@"--disable"]) {
             printf("Will disable TimeMachine for rootfs.\n");
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"rootfs_enabled"] = @NO;
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"max_rootfs_snapshot"] = [NSNumber numberWithInteger:[number integerValue]];
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", [number UTF8String]);
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
@@ -258,22 +207,13 @@ int f(int argc, char **argv, NSArray *args) {
     } else if ([filePath isEqualToString:@"/private/var"]) {
         if ([args containsObject:@"--enable"]) {
             printf("Will enable TimeMachine for datafs.\n");
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"datafs_enabled"] = @YES;
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanTrue, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         } else if ([args containsObject:@"--disable"]) {
             printf("Will disable TimeMachine for datafs.\n");
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"datafs_enabled"] = @NO;
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            modifyPlist(settingsPlist, ^(id plist) {
-                plist[@"max_datafs_snapshot"] = [NSNumber numberWithInteger:[number integerValue]];
-            });
-            run_system("killall -9 cfprefsd");
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", [number UTF8String]);
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
@@ -291,8 +231,6 @@ int f(int argc, char **argv, NSArray *args) {
         usage();
         return 1;
     }
-
-    run_system("killall -9 cfprefsd");
     return 0;
 }
 

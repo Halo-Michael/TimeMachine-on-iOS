@@ -9,11 +9,11 @@
 @implementation TimeMachineRootListController
 
 - (NSArray *)specifiers {
-	if (!_specifiers) {
-		_specifiers = [self loadSpecifiersFromPlistName:@"Root" target:self];
-	}
+    if (!_specifiers) {
+        _specifiers = [self loadSpecifiersFromPlistName:@"Root" target:self];
+    }
 
-	return _specifiers;
+    return _specifiers;
 }
 
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {

@@ -1,5 +1,12 @@
 #import <Foundation/Foundation.h>
 #import <regex.h>
+#import "libTimeMachine.h"
+
+NSDictionary *loadPrefs() {
+    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+    return settings;
+}
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {
     NSData *data = [NSData dataWithContentsOfFile:filename];
@@ -25,4 +32,8 @@ bool modifyPlist(NSString *filename, void (^function)(id)) {
         }
     }
     return true;
+}
+
+CFNumberRef newInt(int value) {
+    return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }

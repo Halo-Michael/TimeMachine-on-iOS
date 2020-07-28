@@ -4,44 +4,27 @@
 #import "../utils.h"
 
 int do_timemachine(const char *vol) {
-    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
-    if (strcmp(vol, "/") != 0 && strcmp(vol, "/private/var") != 0) {
-        perror("what?");
-        exit(1);
-    }
-
+    NSDictionary *settings = loadPrefs();
     int max_snapshot = 3;
-    bool isDirectory;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
-        if (isDirectory) {
-            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
-        } else {
-            if (strcmp(vol, "/") == 0) {
-                if (settings[@"max_rootfs_snapshot"]) {
-                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                        max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-                    } else {
-                        modifyPlist(settingsPlist, ^(id plist) {
-                            plist[@"max_rootfs_snapshot"] = nil;
-                        });
-                        run_system("killall -9 cfprefsd");
-                    }
-                }
-            }
-            if (strcmp(vol, "/private/var") == 0) {
-                if (settings[@"max_datafs_snapshot"]) {
-                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                        max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-                    } else {
-                        modifyPlist(settingsPlist, ^(id plist) {
-                            plist[@"max_datafs_snapshot"] = nil;
-                        });
-                        run_system("killall -9 cfprefsd");
-                    }
-                }
+    if (strcmp(vol, "/") == 0) {
+        if (settings[@"max_rootfs_snapshot"]) {
+            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
+                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            } else {
+                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
+    } else if (strcmp(vol, "/private/var") == 0) {
+        if (settings[@"max_datafs_snapshot"]) {
+            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
+                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            } else {
+                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            }
+        }
+    } else {
+        perror("what?");
+        exit(1);
     }
 
     if (max_snapshot != 0) {
@@ -126,7 +109,7 @@ int main() {
 
     run_system("/etc/rc.d/snapshotcheck");
 
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
+    NSDictionary *settings = loadPrefs();
 
     if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
         do_timemachine("/");
