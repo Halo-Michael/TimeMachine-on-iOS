@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <regex.h>
 #import <sys/snapshot.h>
-#import "../utils.h"
+#import "utils.h"
 
 int do_timemachine(const char *vol) {
     NSDictionary *settings = loadPrefs();
@@ -11,7 +11,7 @@ int do_timemachine(const char *vol) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
             } else {
-                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
     } else if (strcmp(vol, "/private/var") == 0) {
@@ -19,7 +19,7 @@ int do_timemachine(const char *vol) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
             } else {
-                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
     } else {

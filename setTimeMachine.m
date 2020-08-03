@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <regex.h>
 #import <sys/snapshot.h>
-#import "../utils.h"
+#import "utils.h"
 
 void usage() {
     printf("Usage:\tsetTimeMachine [OPTIONS...]\n");
@@ -32,7 +32,7 @@ void showSettings() {
                 printf("Won't save snapshot for rootfs\n");
             }
         } else {
-            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
         }
     } else {
@@ -52,7 +52,7 @@ void showSettings() {
                 printf("Won't save snapshot for datafs\n");
             }
         } else {
-            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), nil, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
         }
     } else {

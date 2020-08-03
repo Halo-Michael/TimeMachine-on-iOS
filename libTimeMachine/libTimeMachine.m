@@ -1,11 +1,16 @@
 #import <Foundation/Foundation.h>
+#import <removefile.h>
 #import <regex.h>
 #import "libTimeMachine.h"
 
 NSDictionary *loadPrefs() {
     CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-    NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
-    return settings;
+    if (keyList != NULL) {
+        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+    }
+    removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
+    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    return nil;
 }
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {

@@ -33,38 +33,26 @@ int main() {
     chown("/usr/bin/setTimeMachine", 0, 0);
     chmod("/usr/bin/setTimeMachine", 06755);
 
-    NSString *const settingsPlist = @"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist";
-    NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:settingsPlist];
+    NSDictionary *settings = loadPrefs();
     NSString *launchdPlist = @"/Library/LaunchDaemons/com.michael.TimeMachine.plist";
-    bool isDirectory;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist" isDirectory:&isDirectory]) {
-        if (isDirectory) {
-            remove("/var/mobile/Library/Preferences/com.michael.TimeMachine.plist");
+    NSString *hour = [NSString stringWithFormat:@"%@", settings[@"Hour"]];
+    NSString *minute = [NSString stringWithFormat:@"%@", settings[@"Minute"]];
+    if (hour != nil) {
+        if (is_number([hour UTF8String]) && [hour intValue] < 24) {
+            modifyPlist(launchdPlist, ^(id plist) {
+                plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
+            });
         } else {
-            NSString *hour = [NSString stringWithFormat:@"%@", settings[@"Hour"]];
-            NSString *minute = [NSString stringWithFormat:@"%@", settings[@"Minute"]];
-            if (hour != nil) {
-                if (is_number([hour UTF8String]) && [hour intValue] < 24) {
-                    modifyPlist(launchdPlist, ^(id plist) {
-                        plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
-                    });
-                } else {
-                    modifyPlist(settingsPlist, ^(id plist) {
-                        plist[@"Hour"] = nil;
-                    });
-                }
-            }
-            if (minute != nil) {
-                if (is_number([minute UTF8String]) && [minute intValue] < 60) {
-                    modifyPlist(launchdPlist, ^(id plist) {
-                        plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
-                    });
-                } else {
-                    modifyPlist(settingsPlist, ^(id plist) {
-                        plist[@"Minute"] = nil;
-                    });
-                }
-            }
+            CFPreferencesSetValue(CFSTR("Hour"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+        }
+    }
+    if (minute != nil) {
+        if (is_number([minute UTF8String]) && [minute intValue] < 60) {
+            modifyPlist(launchdPlist, ^(id plist) {
+                plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
+            });
+        } else {
+            CFPreferencesSetValue(CFSTR("Minute"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
     }
 
