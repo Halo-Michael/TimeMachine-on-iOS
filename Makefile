@@ -55,12 +55,12 @@ preferenceloader-bundle: libTimeMachine
 	cd preferenceloader-bundle && make
 
 setTimeMachine: libTimeMachine
-	$(CC) setTimeMachine.m -o setTimeMachine -framework Foundation libTimeMachine/.theos/obj/libTimeMachine.dylib
+	$(CC) -fobjc-arc setTimeMachine.m -o setTimeMachine -framework Foundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip setTimeMachine
 	$(LDID) -Sentitlements-apfs.xml setTimeMachine
 
 TimeMachine: libTimeMachine
-	$(CC) TimeMachine.m -o TimeMachine -framework Foundation libTimeMachine/.theos/obj/libTimeMachine.dylib
+	$(CC) -fobjc-arc TimeMachine.m -o TimeMachine -framework Foundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip TimeMachine
 	$(LDID) -Sentitlements-apfs.xml TimeMachine
 
