@@ -1,6 +1,6 @@
 export TARGET = iphone:clang:13.0:10.3
 export ARCHS = arm64 arm64e
-export VERSION = 0.10.6
+export VERSION = 0.10.7
 export DEBUG = no
 Package = com.michael.timemachine
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
@@ -47,7 +47,7 @@ prerm: libTimeMachine
 	$(LDID) -Sentitlements-apfs.xml prerm
 
 snapshotcheck: libTimeMachine
-	$(CC) snapshotcheck.c -o snapshotcheck -framework CoreFoundation libTimeMachine/.theos/obj/libTimeMachine.dylib
+	$(CC) -fobjc-arc snapshotcheck.m -o snapshotcheck -framework Foundation libTimeMachine/.theos/obj/libTimeMachine.dylib
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 

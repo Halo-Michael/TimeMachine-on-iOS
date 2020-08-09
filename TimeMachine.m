@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import <regex.h>
+#import <removefile.h>
 #import <sys/snapshot.h>
 #import "utils.h"
 
@@ -28,15 +28,18 @@ int do_timemachine(const char *vol) {
     }
 
     if (max_snapshot != 0) {
-        time_t time_T;
-        time_T = time(NULL);
-        struct tm *tmTime;
-        tmTime = localtime(&time_T);
+        time_t time_T = time(NULL);
+        struct tm *tmTime = localtime(&time_T);
         char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
         char cre_snapshot[42];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
+        removefile("/com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+        FILE *fp = fopen("/com.michael.TimeMachine", "w");
+        fprintf(fp, "%s", cre_snapshot);
+        fclose(fp);
         snapshot_create(vol, cre_snapshot);
+        removefile("/com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
     }
 
     int dirfd = open(vol, O_RDONLY, 0);
@@ -68,18 +71,11 @@ int do_timemachine(const char *vol) {
         if (attrs.commonattr & ATTR_CMN_NAME) {
             attrreference_t ar = *(attrreference_t *)field;
             char *name = field + ar.attr_dataoffset;
+            NSString *snapshotName = [NSString stringWithFormat:@"%s", name];
             field += sizeof (attrreference_t);
-            int status;
-            int cflags = REG_EXTENDED;
-            regmatch_t pmatch[1];
-            const size_t nmatch = 1;
-            regex_t reg;
-            char *pattern = "^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$";
-            regcomp(&reg, pattern, cflags);
-            status = regexec(&reg, name, nmatch, pmatch, 0);
-            regfree(&reg);
-            if (status == 0) {
-                [snapshots addObject:[NSString stringWithFormat:@"%s", name]];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$"];
+            if ([predicate evaluateWithObject:snapshotName]) {
+                [snapshots addObject:snapshotName];
             }
         }
         p += len;
