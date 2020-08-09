@@ -34,12 +34,12 @@ int do_timemachine(const char *vol) {
         char cre_snapshot[42];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
-        removefile("/com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
-        FILE *fp = fopen("/com.michael.TimeMachine", "w");
+        removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+        FILE *fp = fopen("/.com.michael.TimeMachine", "w");
         fprintf(fp, "%s", cre_snapshot);
         fclose(fp);
         snapshot_create(vol, cre_snapshot);
-        removefile("/com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+        removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
     }
 
     int dirfd = open(vol, O_RDONLY, 0);

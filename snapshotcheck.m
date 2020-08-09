@@ -40,7 +40,7 @@ int main() {
                     return 4;
                 }
                 NSString *name = nil;
-                FILE *fp = fopen("/com.michael.TimeMachine", "r");
+                FILE *fp = fopen("/.com.michael.TimeMachine", "r");
                 if (fp == NULL) {
                     time_t time_T = time(NULL);
                     struct tm *tmTime = localtime(&time_T);
