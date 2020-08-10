@@ -1,5 +1,4 @@
 #import <Foundation/Foundation.h>
-#import <sys/snapshot.h>
 #import "utils.h"
 
 void usage() {
@@ -57,44 +56,6 @@ void showSettings() {
     } else {
         printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
     }
-}
-
-int do_timemachine(const char *vol) {
-    NSDictionary *settings = loadPrefs();
-    int max_snapshot = 3;
-    if (strcmp(vol, "/") == 0) {
-        if (settings[@"max_rootfs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-            } else {
-                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            }
-        }
-    } else if (strcmp(vol, "/private/var") == 0) {
-        if (settings[@"max_datafs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-            } else {
-                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            }
-        }
-    } else {
-        perror("what?");
-        exit(1);
-    }
-
-    NSMutableArray *snapshots = copy_snapshot_list(vol);
-
-    if ([snapshots count] > max_snapshot) {
-        while ([snapshots count] > max_snapshot) {
-            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [snapshots[0] UTF8String], vol);
-            snapshot_delete(vol, [snapshots[0] UTF8String]);
-            [snapshots removeObjectAtIndex:0];
-        }
-    } else {
-        return 1;
-    }
-    return 0;
 }
 
 int f(int argc, char **argv, NSArray *args) {
@@ -160,7 +121,7 @@ int f(int argc, char **argv, NSArray *args) {
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
                 printf("Now delete the extra snapshot.\n");
-                if (do_timemachine("/") == 0) {
+                if (do_timemachine("/", false) == 0) {
                     printf("Successfully delete the extra snapshot.\n");
                 } else {
                     printf("There is nothing to do.\n");
@@ -183,7 +144,7 @@ int f(int argc, char **argv, NSArray *args) {
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
                 printf("Now delete the extra snapshot.\n");
-                if (do_timemachine("/private/var") == 0) {
+                if (do_timemachine("/private/var", false) == 0) {
                     printf("Successfully delete the extra snapshot.\n");
                 } else {
                     printf("There is nothing to do.\n");

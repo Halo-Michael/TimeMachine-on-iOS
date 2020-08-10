@@ -17,6 +17,7 @@ NSDictionary *loadPrefs();
 NSMutableArray *copy_snapshot_list(const char *vol);
 bool modifyPlist(NSString *filename, void (^function)(id));
 CFNumberRef newInt(int value);
+int do_timemachine(const char *vol, bool create);
 
 #endif
 

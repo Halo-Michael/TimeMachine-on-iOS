@@ -3,6 +3,7 @@
 #import <regex.h>
 #import <sys/snapshot.h>
 #import "libTimeMachine.h"
+#import "../utils.h"
 
 NSDictionary *loadPrefs() {
     CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
@@ -81,4 +82,57 @@ bool modifyPlist(NSString *filename, void (^function)(id)) {
 
 CFNumberRef newInt(int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
+}
+
+int do_timemachine(const char *vol, bool create) {
+    NSDictionary *settings = loadPrefs();
+    int max_snapshot = 3;
+    if (strcmp(vol, "/") == 0) {
+        if (settings[@"max_rootfs_snapshot"]) {
+            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
+                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+            } else {
+                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            }
+        }
+    } else if (strcmp(vol, "/private/var") == 0) {
+        if (settings[@"max_datafs_snapshot"]) {
+            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
+                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+            } else {
+                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            }
+        }
+    } else {
+        perror("what?");
+        exit(1);
+    }
+
+    if (create && max_snapshot != 0) {
+        time_t time_T = time(NULL);
+        struct tm *tmTime = localtime(&time_T);
+        char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
+        char cre_snapshot[42];
+        strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
+        printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
+        removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+        FILE *fp = fopen("/.com.michael.TimeMachine", "w");
+        fprintf(fp, "%s", cre_snapshot);
+        fclose(fp);
+        snapshot_create(vol, cre_snapshot);
+        removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+    }
+
+    NSMutableArray *snapshots = copy_snapshot_list(vol);
+
+    if ([snapshots count] > max_snapshot) {
+        while ([snapshots count] > max_snapshot) {
+            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
+            snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+            [snapshots removeObjectAtIndex:0];
+        }
+    } else {
+        return 1;
+    }
+    return 0;
 }
