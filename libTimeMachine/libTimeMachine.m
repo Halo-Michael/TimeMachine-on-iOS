@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 #import <removefile.h>
-#import <regex.h>
 #import <sys/snapshot.h>
 
 __attribute__((aligned(4)))
