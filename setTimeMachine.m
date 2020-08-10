@@ -30,7 +30,7 @@ void showSettings() {
                 printf("Won't save snapshot for rootfs\n");
             }
         } else {
-            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
         }
     } else {
@@ -50,7 +50,7 @@ void showSettings() {
                 printf("Won't save snapshot for datafs\n");
             }
         } else {
-            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
         }
     } else {
@@ -110,13 +110,13 @@ int f(int argc, char **argv, NSArray *args) {
     if ([filePath isEqualToString:@"/"]) {
         if ([args containsObject:@"--enable"]) {
             printf("Will enable TimeMachine for rootfs.\n");
-            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanTrue, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanTrue, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else if ([args containsObject:@"--disable"]) {
             printf("Will disable TimeMachine for rootfs.\n");
-            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanFalse, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), newInt([number intValue]), bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", [number UTF8String]);
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
@@ -133,13 +133,13 @@ int f(int argc, char **argv, NSArray *args) {
     } else if ([filePath isEqualToString:@"/private/var"]) {
         if ([args containsObject:@"--enable"]) {
             printf("Will enable TimeMachine for datafs.\n");
-            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanTrue, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanTrue, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else if ([args containsObject:@"--disable"]) {
             printf("Will disable TimeMachine for datafs.\n");
-            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanFalse, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), newInt([number intValue]), bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", [number UTF8String]);
             NSDictionary *const settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.michael.TimeMachine.plist"];
             if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {

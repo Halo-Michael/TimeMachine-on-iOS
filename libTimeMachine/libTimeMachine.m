@@ -11,7 +11,9 @@ typedef struct val_attrs {
     char            name[MAXPATHLEN];
 } val_attrs_t;
 
-CFStringRef bundleID = CFSTR("com.michael.TimeMachine");
+CFStringRef bundleID() {
+    return CFSTR("com.michael.TimeMachine");
+}
 
 bool is_number(const char *num) {
     if (strcmp(num, "0") == 0) {
@@ -133,12 +135,12 @@ void run_system(const char *cmd) {
 }
 
 NSDictionary *loadPrefs() {
-    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
     if (keyList != NULL) {
-        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost));
     }
     removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
-    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSynchronize(bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
     return nil;
 }
 
@@ -179,8 +181,10 @@ int do_timemachine(const char *vol, bool create) {
         if (settings[@"max_rootfs_snapshot"]) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+                printf("1.Here!...%d\n", max_snapshot);
             } else {
-                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+                printf("2.Here!...%d\n", max_snapshot);
             }
         }
     } else if (strcmp(vol, "/private/var") == 0) {
@@ -188,7 +192,7 @@ int do_timemachine(const char *vol, bool create) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
             } else {
-                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
     } else {

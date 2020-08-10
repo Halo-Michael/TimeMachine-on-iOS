@@ -18,7 +18,7 @@ int do_timemachine(const char *vol, bool create);
 
 #endif
 
-CFStringRef bundleID;
+CFStringRef bundleID();
 bool is_number(const char *num);
 int snapshot_create(const char *vol, const char *snap);
 bool snapshot_check(const char *vol, const char *snap);
