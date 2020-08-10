@@ -2,20 +2,56 @@
 #import <removefile.h>
 #import <regex.h>
 #import <sys/snapshot.h>
-#import "libTimeMachine.h"
-#import "../utils.h"
 
-NSDictionary *loadPrefs() {
-    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-    if (keyList != NULL) {
-        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+__attribute__((aligned(4)))
+typedef struct val_attrs {
+    uint32_t        length;
+    attribute_set_t        returned;
+    attrreference_t        name_info;
+    char            name[MAXPATHLEN];
+} val_attrs_t;
+
+CFStringRef bundleID = CFSTR("com.michael.TimeMachine");
+
+bool is_number(const char *num) {
+    if (strcmp(num, "0") == 0) {
+        return true;
     }
-    removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
-    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-    return nil;
+    const char* p = num;
+    if (*p < '1' || *p > '9') {
+        return false;
+    } else {
+        p++;
+    }
+    while (*p) {
+        if(*p < '0' || *p > '9') {
+            return false;
+        } else {
+            p++;
+        }
+    }
+    return true;
 }
 
-NSMutableArray *copy_snapshot_list(const char *vol) {
+int snapshot_create(const char *vol, const char *snap) {
+    int dirfd = open(vol, O_RDONLY, 0);
+    if (dirfd < 0) {
+        perror("open");
+        exit(1);
+    }
+
+    int ret = fs_snapshot_create(dirfd, snap, 0);
+    close(dirfd);
+    if (ret != 0) {
+        perror("fs_snapshot_create");
+        printf("Failure\n");
+    } else {
+        printf("Success\n");
+    }
+    return ret;
+}
+
+bool snapshot_check(const char *vol, const char *snap) {
     int dirfd = open(vol, O_RDONLY, 0);
     if (dirfd < 0) {
         perror("open");
@@ -28,16 +64,14 @@ NSMutableArray *copy_snapshot_list(const char *vol) {
 
     val_attrs_t buf;
     bzero(&buf, sizeof(buf));
-    NSMutableArray *snapshots = [NSMutableArray array];
     int retcount;
     while ((retcount = fs_snapshot_list(dirfd, &attr_list, &buf, sizeof(buf), 0))>0) {
         val_attrs_t *entry = &buf;
         for (int i = 0; i < retcount; i++) {
             if (entry->returned.commonattr & ATTR_CMN_NAME) {
-                NSString *snapshotName = [NSString stringWithFormat:@"%s", entry->name];
-                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$"];
-                if ([predicate evaluateWithObject:snapshotName]) {
-                    [snapshots addObject:snapshotName];
+                if (strcmp(entry->name, snap) == 0) {
+                    close(dirfd);
+                    return true;
                 }
             }
             entry = (val_attrs_t *)((char *)entry + entry->length);
@@ -48,10 +82,64 @@ NSMutableArray *copy_snapshot_list(const char *vol) {
 
     if (retcount < 0) {
         perror("fs_snapshot_list");
-        return nil;
+        exit(1);
     }
 
-    return snapshots;
+    return false;
+}
+
+int snapshot_delete(const char *vol, const char *snap) {
+    int dirfd = open(vol, O_RDONLY, 0);
+    if (dirfd < 0) {
+        perror("open");
+        exit(1);
+    }
+
+    int ret = fs_snapshot_delete(dirfd, snap, 0);
+    close(dirfd);
+    if (ret != 0) {
+        perror("fs_snapshot_delete");
+        printf("Failure\n");
+    } else {
+        printf("Success\n");
+    }
+    return ret;
+}
+
+int snapshot_rename(const char *vol, const char *snap, const char *nw) {
+    int dirfd = open(vol, O_RDONLY, 0);
+    if (dirfd < 0) {
+        perror("open");
+        exit(1);
+    }
+
+    int ret = fs_snapshot_rename(dirfd, snap, nw, 0);
+    close(dirfd);
+    if (ret != 0) {
+        perror("fs_snapshot_rename");
+        printf("Failure\n");
+    } else {
+        printf("Success\n");
+    }
+    return ret;
+}
+
+void run_system(const char *cmd) {
+    int status = system(cmd);
+    if (WEXITSTATUS(status) != 0) {
+        perror(cmd);
+        exit(WEXITSTATUS(status));
+    }
+}
+
+NSDictionary *loadPrefs() {
+    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    if (keyList != NULL) {
+        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+    }
+    removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
+    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+    return nil;
 }
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {
@@ -123,7 +211,40 @@ int do_timemachine(const char *vol, bool create) {
         removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
     }
 
-    NSMutableArray *snapshots = copy_snapshot_list(vol);
+    int dirfd = open(vol, O_RDONLY, 0);
+    if (dirfd < 0) {
+        perror("open");
+        exit(1);
+    }
+
+    struct attrlist attr_list = { 0 };
+
+    attr_list.commonattr = ATTR_BULK_REQUIRED;
+
+    val_attrs_t buf;
+    bzero(&buf, sizeof(buf));
+    NSMutableArray *snapshots = [NSMutableArray array];
+    int retcount;
+    while ((retcount = fs_snapshot_list(dirfd, &attr_list, &buf, sizeof(buf), 0))>0) {
+        val_attrs_t *entry = &buf;
+        for (int i = 0; i < retcount; i++) {
+            if (entry->returned.commonattr & ATTR_CMN_NAME) {
+                NSString *snapshotName = [NSString stringWithFormat:@"%s", entry->name];
+                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$"];
+                if ([predicate evaluateWithObject:snapshotName]) {
+                    [snapshots addObject:snapshotName];
+                }
+            }
+            entry = (val_attrs_t *)((char *)entry + entry->length);
+        }
+        bzero(&buf, sizeof(buf));
+    }
+    close(dirfd);
+
+    if (retcount < 0) {
+        perror("fs_snapshot_list");
+        exit(1);
+    }
 
     if ([snapshots count] > max_snapshot) {
         while ([snapshots count] > max_snapshot) {
