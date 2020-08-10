@@ -14,6 +14,7 @@
 #import "libTimeMachine/libTimeMachine.h"
 
 NSDictionary *loadPrefs();
+NSMutableArray *copy_snapshot_list(const char *vol);
 bool modifyPlist(NSString *filename, void (^function)(id));
 CFNumberRef newInt(int value);
 
