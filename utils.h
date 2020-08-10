@@ -11,15 +11,15 @@
 
 #ifdef __OBJC__
 
-NSDictionary *loadPrefs();
 bool modifyPlist(NSString *filename, void (^function)(id));
-CFNumberRef newInt(int value);
-int do_timemachine(const char *vol, bool create);
+NSDictionary *loadPrefs();
 
 #endif
 
-CFStringRef bundleID();
 bool is_number(const char *num);
+CFStringRef bundleID();
+CFNumberRef newInt(int value);
+int do_timemachine(const char *vol, bool create);
 int snapshot_create(const char *vol, const char *snap);
 bool snapshot_check(const char *vol, const char *snap);
 int snapshot_delete(const char *vol, const char *snap);
