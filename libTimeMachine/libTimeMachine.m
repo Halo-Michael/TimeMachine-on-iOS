@@ -181,10 +181,8 @@ int do_timemachine(const char *vol, bool create) {
         if (settings[@"max_rootfs_snapshot"]) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-                printf("1.Here!...%d\n", max_snapshot);
             } else {
                 CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
-                printf("2.Here!...%d\n", max_snapshot);
             }
         }
     } else if (strcmp(vol, "/private/var") == 0) {
