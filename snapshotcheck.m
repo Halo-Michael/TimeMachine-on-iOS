@@ -62,7 +62,7 @@ int main() {
                     } else {
                         time_t time_T = time(NULL);
                         struct tm *tmTime = localtime(&time_T);
-                        char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
+                        const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
                         char snapshot_name[42];
                         strftime(snapshot_name, sizeof(snapshot_name), format, tmTime);
                         name = [NSString stringWithFormat:@"%s", snapshot_name];
