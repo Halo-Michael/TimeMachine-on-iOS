@@ -18,8 +18,8 @@ NSDictionary *loadPrefs();
 
 bool is_number(const char *num);
 CFStringRef bundleID();
-CFNumberRef newInt(int value);
-int do_timemachine(const char *vol, bool create);
+CFNumberRef newInt(const int value);
+int do_timemachine(const char *vol, const bool create);
 int snapshot_create(const char *vol, const char *snap);
 bool snapshot_check(const char *vol, const char *snap);
 int snapshot_delete(const char *vol, const char *snap);

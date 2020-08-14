@@ -12,9 +12,9 @@ void usage() {
 }
 
 void showSettings() {
-    NSDictionary *const launchdSettings = [NSDictionary dictionaryWithContentsOfFile:@"/Library/LaunchDaemons/com.michael.TimeMachine.plist"];
+    NSDictionary *launchdSettings = [NSDictionary dictionaryWithContentsOfFile:@"/Library/LaunchDaemons/com.michael.TimeMachine.plist"];
     printf("Will backup snapshots at %d:%d.\n", [launchdSettings[@"StartCalendarInterval"][@"Hour"] intValue], [launchdSettings[@"StartCalendarInterval"][@"Minute"] intValue]);
-    NSDictionary *const settings = loadPrefs();
+    NSDictionary *settings = loadPrefs();
     int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
     if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
         printf("TimeMachine for rootfs is enabled.\n");
@@ -58,7 +58,7 @@ void showSettings() {
     }
 }
 
-int f(int argc, char **argv, NSArray *args) {
+int f(const int argc, const char *argv[], NSArray *args) {
     NSString *filePath = nil, *number = nil;
     if ([args count] > ([args indexOfObject:@"-f"] + 1)) {
         filePath = args[([args indexOfObject:@"-f"] + 1)];
@@ -160,7 +160,7 @@ int f(int argc, char **argv, NSArray *args) {
     return 0;
 }
 
-int t(int argc, char **argv, NSArray *args) {
+int t(const int argc, const char *argv[], NSArray *args) {
     NSString *hour = nil, *minute = nil;
     if ([args containsObject:@"--hour"] || [args containsObject:@"--minute"]) {
         if ([args count] > ([args indexOfObject:@"--hour"] + 1) && is_number([args[([args indexOfObject:@"--hour"] + 1)] UTF8String]) && [args[([args indexOfObject:@"--hour"] + 1)] intValue] < 24) {
@@ -197,7 +197,7 @@ int t(int argc, char **argv, NSArray *args) {
     return 0;
 }
 
-int main(int argc, char **argv) {
+int main(const int argc, const char *argv[]) {
     if (getuid() != 0) {
         setuid(0);
     }

@@ -169,11 +169,11 @@ bool modifyPlist(NSString *filename, void (^function)(id)) {
     return true;
 }
 
-CFNumberRef newInt(int value) {
+CFNumberRef newInt(const int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
-int do_timemachine(const char *vol, bool create) {
+int do_timemachine(const char *vol, const bool create) {
     NSDictionary *settings = loadPrefs();
     int max_snapshot = 3;
     if (strcmp(vol, "/") == 0) {
@@ -200,14 +200,16 @@ int do_timemachine(const char *vol, bool create) {
     if (create && max_snapshot != 0) {
         time_t time_T = time(NULL);
         struct tm *tmTime = localtime(&time_T);
-        char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
+        const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
         char cre_snapshot[42];
         strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
-        removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
-        FILE *fp = fopen("/.com.michael.TimeMachine", "w");
-        fprintf(fp, "%s", cre_snapshot);
-        fclose(fp);
+        if (strcmp(vol, "/") == 0) {
+            removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
+            FILE *fp = fopen("/.com.michael.TimeMachine", "w");
+            fprintf(fp, "%s", cre_snapshot);
+            fclose(fp);
+        }
         snapshot_create(vol, cre_snapshot);
         removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
     }
@@ -247,14 +249,12 @@ int do_timemachine(const char *vol, bool create) {
         exit(1);
     }
 
-    if ([snapshots count] > max_snapshot) {
-        while ([snapshots count] > max_snapshot) {
-            printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
-            snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
-            [snapshots removeObjectAtIndex:0];
-        }
-    } else {
-        return 1;
+    int ret = 1;
+    while ([snapshots count] > max_snapshot) {
+        printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
+        snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
+        [snapshots removeObjectAtIndex:0];
+        ret = 0;
     }
-    return 0;
+    return ret;
 }
