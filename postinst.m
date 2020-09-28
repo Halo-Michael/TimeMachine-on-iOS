@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
-#include <sys/stat.h>
-#include "utils.h"
+#import <sys/stat.h>
+#import "utils.h"
 
 int main() {
     if (getuid() != 0) {
@@ -43,7 +43,7 @@ int main() {
                 plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
             });
         } else {
-            CFPreferencesSetValue(CFSTR("Hour"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("Hour"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
     }
     if (minute != nil) {
@@ -52,7 +52,7 @@ int main() {
                 plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
             });
         } else {
-            CFPreferencesSetValue(CFSTR("Minute"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("Minute"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
     }
 

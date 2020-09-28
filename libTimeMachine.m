@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <removefile.h>
 #import <sys/snapshot.h>
+#import "utils.h"
 
 __attribute__((aligned(4)))
 typedef struct val_attrs {
@@ -9,10 +10,6 @@ typedef struct val_attrs {
     attrreference_t        name_info;
     char            name[MAXPATHLEN];
 } val_attrs_t;
-
-CFStringRef bundleID() {
-    return CFSTR("com.michael.TimeMachine");
-}
 
 bool is_number(const char *num) {
     if (strcmp(num, "0") == 0) {
@@ -134,12 +131,14 @@ void run_system(const char *cmd) {
 }
 
 NSDictionary *loadPrefs() {
-    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
     if (keyList != NULL) {
-        return (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost));
+        NSDictionary *prefs = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+        CFRelease(keyList);
+        return prefs;
     }
     removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
-    CFPreferencesSynchronize(bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
     return nil;
 }
 
@@ -180,7 +179,7 @@ int do_timemachine(const char *vol, const bool create) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
             } else {
-                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
     } else if (strcmp(vol, "/private/var") == 0) {
@@ -188,7 +187,7 @@ int do_timemachine(const char *vol, const bool create) {
             if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
                 max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
             } else {
-                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID(), CFSTR("mobile"), kCFPreferencesAnyHost);
+                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
         }
     } else {

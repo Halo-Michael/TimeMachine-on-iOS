@@ -9,6 +9,10 @@
 #   define kCFCoreFoundationVersionNumber_iOS_11_0 1443.00
 #endif
 
+#ifndef bundleID
+#   define bundleID CFSTR("com.michael.TimeMachine")
+#endif
+
 #ifdef __OBJC__
 
 bool modifyPlist(NSString *filename, void (^function)(id));
@@ -17,7 +21,6 @@ NSDictionary *loadPrefs();
 #endif
 
 bool is_number(const char *num);
-CFStringRef bundleID();
 CFNumberRef newInt(const int value);
 int do_timemachine(const char *vol, const bool create);
 int snapshot_create(const char *vol, const char *snap);

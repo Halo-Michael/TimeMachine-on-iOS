@@ -1,6 +1,5 @@
 # https://travis-ci.org
 
-sudo: true
 language: objective-c
 os: osx
 osx_image: xcode11.3
