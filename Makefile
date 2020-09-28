@@ -35,6 +35,7 @@ all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck s
 
 libTimeMachine: clean
 	$(CC) -dynamiclib -fobjc-arc -install_name /usr/lib/libTimeMachine.dylib -compatibility_version $(VERSION) -current_version $(VERSION) -framework Foundation libTimeMachine.m -o libTimeMachine.dylib
+	$(LDID) -S libTimeMachine.dylib
 
 postinst: libTimeMachine
 	$(CC) -fobjc-arc -framework Foundation libTimeMachine.dylib postinst.m -o postinst
