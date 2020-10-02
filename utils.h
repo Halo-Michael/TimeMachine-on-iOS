@@ -22,7 +22,7 @@ NSDictionary *loadPrefs();
 
 bool is_number(const char *num);
 CFNumberRef newInt(const int value);
-int do_timemachine(const char *vol, const bool create);
+int do_timemachine(const char *vol, const bool create, const int max_snapshot);
 int snapshot_create(const char *vol, const char *snap);
 bool snapshot_check(const char *vol, const char *snap);
 int snapshot_delete(const char *vol, const char *snap);

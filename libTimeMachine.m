@@ -171,30 +171,7 @@ CFNumberRef newInt(const int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
-int do_timemachine(const char *vol, const bool create) {
-    NSDictionary *settings = loadPrefs();
-    int max_snapshot = 3;
-    if (strcmp(vol, "/") == 0) {
-        if (settings[@"max_rootfs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-            } else {
-                CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            }
-        }
-    } else if (strcmp(vol, "/private/var") == 0) {
-        if (settings[@"max_datafs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-            } else {
-                CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            }
-        }
-    } else {
-        perror("what?");
-        exit(1);
-    }
-
+int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
     if (create && max_snapshot != 0) {
         time_t time_T = time(NULL);
         struct tm *tmTime = localtime(&time_T);
