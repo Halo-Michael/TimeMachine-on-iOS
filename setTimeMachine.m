@@ -121,15 +121,7 @@ int f(const int argc, const char *argv[], NSArray *args) {
             NSDictionary *settings = loadPrefs();
             if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
                 printf("Now delete the extra snapshot.\n");
-                int max_snapshot = 3;
-                if (settings[@"max_rootfs_snapshot"]) {
-                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                        max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
-                    } else {
-                        CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-                    }
-                }
-                if (do_timemachine("/", false, max_snapshot) == 0) {
+                if (do_timemachine("/", false, [number intValue]) == 0) {
                     printf("Successfully delete the extra snapshot.\n");
                 } else {
                     printf("There is nothing to do.\n");
@@ -152,15 +144,7 @@ int f(const int argc, const char *argv[], NSArray *args) {
             NSDictionary *settings = loadPrefs();
             if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
                 printf("Now delete the extra snapshot.\n");
-                int max_snapshot = 3;
-                if (settings[@"max_datafs_snapshot"]) {
-                    if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                        max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
-                    } else {
-                        CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-                    }
-                }
-                if (do_timemachine("/private/var", false, max_snapshot) == 0) {
+                if (do_timemachine("/private/var", false, [number intValue]) == 0) {
                     printf("Successfully delete the extra snapshot.\n");
                 } else {
                     printf("There is nothing to do.\n");
