@@ -1,6 +1,6 @@
 export TARGET = iphone:clang:13.0:10.3
 export ARCHS = arm64 arm64e
-export VERSION = 0.11.5
+export VERSION = 0.11.6
 export DEBUG = no
 Package = com.michael.timemachine
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
@@ -8,7 +8,7 @@ LDID = ldid
 
 .PHONY: all clean
 
-all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck setTimeMachine TimeMachine
+all: clean libTimeMachine postinst prerm TimeMachineRootListController snapshotcheck setTimeMachine TimeMachine
 	mkdir $(Package)_$(VERSION)_iphoneos-arm
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
@@ -27,8 +27,9 @@ all: clean libTimeMachine postinst prerm preferenceloader-bundle snapshotcheck s
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences
-	mv preferenceloader-bundle/.theos/obj/TimeMachine.bundle $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles
-	cp preferenceloader-bundle/entry.plist $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences/TimeMachine.plist
+	cp -r Resources $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles/TimeMachine.bundle
+	mv TimeMachineRootListController $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles/TimeMachine.bundle/TimeMachine
+	cp entry.plist $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences/TimeMachine.plist
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/usr/libexec
 	mv TimeMachine $(Package)_$(VERSION)_iphoneos-arm/usr/libexec
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
@@ -53,8 +54,10 @@ snapshotcheck: libTimeMachine
 	strip snapshotcheck
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
-preferenceloader-bundle: libTimeMachine
-	cd preferenceloader-bundle && make
+TimeMachineRootListController: libTimeMachine
+	$(CC) -dynamiclib -fobjc-arc -install_name /Library/PreferenceBundles/TimeMachine.bundle/TimeMachine -I/opt/theos/vendor/include/ -framework Foundation ${THEOS}/sdks/iPhoneOS13.0.sdk/System/Library/PrivateFrameworks/Preferences.framework/Preferences.tbd libTimeMachine.dylib TimeMachineRootListController.m -o TimeMachineRootListController
+	strip -x TimeMachineRootListController
+	ldid -S TimeMachineRootListController
 
 setTimeMachine: libTimeMachine
 	$(CC) -fobjc-arc -framework Foundation libTimeMachine.dylib setTimeMachine.m -o setTimeMachine
@@ -67,7 +70,7 @@ TimeMachine: libTimeMachine
 	$(LDID) -Sentitlements-apfs.xml TimeMachine
 
 clean:
-	rm -rf $(Package)_* libTimeMachine.dylib postinst prerm preferenceloader-bundle/.theos snapshotcheck setTimeMachine TimeMachine
+	rm -rf $(Package)_* libTimeMachine.dylib postinst prerm TimeMachineRootListController snapshotcheck setTimeMachine TimeMachine
 
 install:
 	scp $(Package)_$(VERSION)_iphoneos-arm.deb root@$(THEOS_DEVICE_IP):/tmp/_theos_install.deb

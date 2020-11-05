@@ -116,7 +116,7 @@ int f(const int argc, const char *argv[], NSArray *args) {
             CFPreferencesSetValue(CFSTR("rootfs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), CFAutorelease(newInt([number intValue])), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for rootfs.\n", [number UTF8String]);
             NSDictionary *settings = loadPrefs();
             if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
@@ -139,7 +139,7 @@ int f(const int argc, const char *argv[], NSArray *args) {
             CFPreferencesSetValue(CFSTR("datafs_enabled"), kCFBooleanFalse, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (number != nil) {
-            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), newInt([number intValue]), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+            CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), CFAutorelease(newInt([number intValue])), bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             printf("Successfully set TimeMachine to backup up to most %s snapshots for datafs.\n", [number UTF8String]);
             NSDictionary *settings = loadPrefs();
             if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {

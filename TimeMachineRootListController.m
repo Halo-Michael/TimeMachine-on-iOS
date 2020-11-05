@@ -1,6 +1,6 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
-#import "../utils.h"
+#import "utils.h"
 
 @interface TimeMachineRootListController : PSListController
 
