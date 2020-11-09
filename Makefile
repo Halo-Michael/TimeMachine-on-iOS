@@ -57,7 +57,7 @@ snapshotcheck: libTimeMachine
 TimeMachineRootListController: libTimeMachine
 	$(CC) -dynamiclib -fobjc-arc -install_name /Library/PreferenceBundles/TimeMachine.bundle/TimeMachine -I${THEOS}/vendor/include/ -framework Foundation ${THEOS}/sdks/iPhoneOS13.0.sdk/System/Library/PrivateFrameworks/Preferences.framework/Preferences.tbd libTimeMachine.dylib TimeMachineRootListController.m -o TimeMachineRootListController
 	strip -x TimeMachineRootListController
-	ldid -S TimeMachineRootListController
+	$(LDID) -S TimeMachineRootListController
 
 setTimeMachine: libTimeMachine
 	$(CC) -fobjc-arc -framework Foundation libTimeMachine.dylib setTimeMachine.m -o setTimeMachine
