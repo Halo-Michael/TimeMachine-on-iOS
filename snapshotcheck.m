@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <regex.h>
 #import <removefile.h>
 #import <sys/mount.h>
 #import <sys/snapshot.h>
@@ -39,41 +40,41 @@ int main() {
                     perror("fs_snapshot_mount");
                     return 4;
                 }
-                NSString *name = nil;
+                char *snapshot_name = NULL;
                 FILE *fp = fopen("/.com.michael.TimeMachine", "r");
                 if (fp == NULL) {
                     time_t time_T = time(NULL);
                     struct tm *tmTime = localtime(&time_T);
                     char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
-                    char snapshot_name[42];
+                    snapshot_name = (char *)calloc(42, sizeof(char));
                     strftime(snapshot_name, sizeof(snapshot_name), format, tmTime);
-                    name = [NSString stringWithFormat:@"%s", snapshot_name];
                 } else {
-                    NSMutableString *getString = [[NSMutableString alloc] init];
-                    char buffer = fgetc(fp);
-                    while (!feof(fp)) {
-                        [getString appendFormat:@"%c", buffer];
-                        buffer = fgetc(fp);
-                    }
+                    fseek(fp, 0, SEEK_END);
+                    unsigned long strLen = ftell(fp) + 1;
+                    fseek(fp, 0, SEEK_SET);
+                    snapshot_name = (char *)calloc(strLen, sizeof(char));
+                    fread(snapshot_name, sizeof(char), strLen, fp);
                     fclose(fp);
-                    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$"];
-                    if ([predicate evaluateWithObject:getString]) {
-                        name = [NSString stringWithString:getString];
-                    } else {
+                    regex_t predicate;
+                    regcomp(&predicate, "^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$", REG_EXTENDED | REG_NEWLINE | REG_NOSUB);
+                    if (regexec(&predicate, snapshot_name, 0, NULL, 0) != 0) {
+                        free(snapshot_name);
                         time_t time_T = time(NULL);
                         struct tm *tmTime = localtime(&time_T);
                         const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
-                        char snapshot_name[42];
+                        snapshot_name = (char *)calloc(42, sizeof(char));
                         strftime(snapshot_name, sizeof(snapshot_name), format, tmTime);
-                        name = [NSString stringWithFormat:@"%s", snapshot_name];
                     }
+                    regfree(&predicate);
                 }
                 unmount("/mnt2", MNT_FORCE);
                 if (!mnt2Existed) {
                     removefile("/mnt2", NULL, REMOVEFILE_RECURSIVE);
                 }
-                printf("Will rename snapshot \"orig-fs\" on fs / to \"%s\"\n", [name UTF8String]);
-                snapshot_rename("/", "orig-fs", [name UTF8String]);
+                printf("Will rename snapshot \"orig-fs\" on fs / to \"%s\"\n", snapshot_name);
+                snapshot_rename("/", "orig-fs", snapshot_name);
+                free(snapshot_name);
+                removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
             } else {
                 printf("Will rename snapshot \"orig-fs\" on fs / to \"com.apple.TimeMachine.orig-fs\"\n");
                 snapshot_rename("/", "orig-fs", "com.apple.TimeMachine.orig-fs");
