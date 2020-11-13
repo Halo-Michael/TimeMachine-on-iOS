@@ -41,7 +41,7 @@ int main() {
                     return 4;
                 }
                 char *snapshot_name = NULL;
-                FILE *fp = fopen("/.com.michael.TimeMachine", "r");
+                FILE *fp = fopen("/mnt2/.com.michael.TimeMachine", "r");
                 if (fp == NULL) {
                     time_t time_T = time(NULL);
                     struct tm *tmTime = localtime(&time_T);
