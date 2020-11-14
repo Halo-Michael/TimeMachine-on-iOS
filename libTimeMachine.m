@@ -177,7 +177,7 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
         struct tm *tmTime = localtime(&time_T);
         const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
         char *cre_snapshot = (char *)calloc(42, sizeof(char));
-        strftime(cre_snapshot, sizeof(cre_snapshot), format, tmTime);
+        strftime(cre_snapshot, 42, format, tmTime);
         printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
         if (strcmp(vol, "/") == 0) {
             removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);

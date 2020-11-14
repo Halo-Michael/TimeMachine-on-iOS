@@ -47,7 +47,7 @@ int main() {
                     struct tm *tmTime = localtime(&time_T);
                     char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
                     snapshot_name = (char *)calloc(42, sizeof(char));
-                    strftime(snapshot_name, sizeof(snapshot_name), format, tmTime);
+                    strftime(snapshot_name, 42, format, tmTime);
                 } else {
                     fseek(fp, 0, SEEK_END);
                     unsigned long strLen = ftell(fp) + 1;
@@ -63,7 +63,7 @@ int main() {
                         struct tm *tmTime = localtime(&time_T);
                         const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
                         snapshot_name = (char *)calloc(42, sizeof(char));
-                        strftime(snapshot_name, sizeof(snapshot_name), format, tmTime);
+                        strftime(snapshot_name, 42, format, tmTime);
                     }
                     regfree(&predicate);
                 }
