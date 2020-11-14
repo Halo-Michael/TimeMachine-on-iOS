@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
-#import "utils.h"
+#include <CoreFoundation/CoreFoundation.h>
+#include "utils.h"
 
 int main() {
     if (getuid() != 0) {

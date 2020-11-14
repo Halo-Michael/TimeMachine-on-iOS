@@ -65,7 +65,7 @@ setTimeMachine: libTimeMachine
 	$(LDID) -Sentitlements-apfs.xml setTimeMachine
 
 TimeMachine: libTimeMachine
-	$(CC) -fobjc-arc -framework Foundation libTimeMachine.dylib TimeMachine.m -o TimeMachine
+	$(CC) -framework CoreFoundation libTimeMachine.dylib TimeMachine.c -o TimeMachine
 	strip TimeMachine
 	$(LDID) -Sentitlements-apfs.xml TimeMachine
 
