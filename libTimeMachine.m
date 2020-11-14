@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <regex.h>
 #import <removefile.h>
 #import <sys/snapshot.h>
 #import "utils.h"
@@ -210,11 +211,12 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
         val_attrs_t *entry = &buf;
         for (int i = 0; i < retcount; i++) {
             if (entry->returned.commonattr & ATTR_CMN_NAME) {
-                NSString *snapshotName = [NSString stringWithFormat:@"%s", entry->name];
-                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$"];
-                if ([predicate evaluateWithObject:snapshotName]) {
-                    [snapshots addObject:snapshotName];
+                regex_t predicate;
+                regcomp(&predicate, "^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$", REG_EXTENDED | REG_NEWLINE | REG_NOSUB);
+                if (regexec(&predicate, entry->name, 0, NULL, 0) == 0) {
+                    [snapshots addObject:[NSString stringWithFormat:@"%s", entry->name]];
                 }
+                regfree(&predicate);
             }
             entry = (val_attrs_t *)((char *)entry + entry->length);
         }

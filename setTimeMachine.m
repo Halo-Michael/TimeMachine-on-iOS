@@ -58,7 +58,7 @@ void showSettings() {
     }
 }
 
-int f(const int argc, const char *argv[], NSArray *args) {
+int f(NSArray *args) {
     NSString *filePath = nil, *number = nil;
     if ([args count] > ([args indexOfObject:@"-f"] + 1)) {
         filePath = args[([args indexOfObject:@"-f"] + 1)];
@@ -160,7 +160,7 @@ int f(const int argc, const char *argv[], NSArray *args) {
     return 0;
 }
 
-int t(const int argc, const char *argv[], NSArray *args) {
+int t(NSArray *args) {
     NSString *hour = nil, *minute = nil;
     if ([args containsObject:@"--hour"] || [args containsObject:@"--minute"]) {
         if ([args count] > ([args indexOfObject:@"--hour"] + 1) && is_number([args[([args indexOfObject:@"--hour"] + 1)] UTF8String]) && [args[([args indexOfObject:@"--hour"] + 1)] intValue] < 24) {
@@ -223,13 +223,13 @@ int main(const int argc, const char *argv[]) {
     if ([args containsObject:@"-f"] || [args containsObject:@"-t"]) {
         int status;
         if ([args containsObject:@"-f"]) {
-            status = f(argc, argv, args);
+            status = f(args);
             if (status != 0) {
                 return status;
             }
         }
         if ([args containsObject:@"-t"]) {
-            status = t(argc, argv, args);
+            status = t(args);
             if (status != 0) {
                 return status;
             }
