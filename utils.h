@@ -16,10 +16,10 @@
 #ifdef __OBJC__
 
 bool modifyPlist(NSString *filename, void (^function)(id));
-NSDictionary *loadPrefs();
 
 #endif
 
+CFDictionaryRef loadPrefs();
 bool is_number(const char *num);
 CFNumberRef newInt(const int value);
 int do_timemachine(const char *vol, const bool create, const int max_snapshot);

@@ -45,7 +45,7 @@ int main() {
                 if (fp == NULL) {
                     time_t time_T = time(NULL);
                     struct tm *tmTime = localtime(&time_T);
-                    char* format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
+                    const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
                     snapshot_name = (char *)calloc(42, sizeof(char));
                     strftime(snapshot_name, 42, format, tmTime);
                 } else {

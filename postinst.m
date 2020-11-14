@@ -32,28 +32,44 @@ int main() {
     chmod("/usr/libexec/TimeMachine", 06755);
     chown("/usr/bin/setTimeMachine", 0, 0);
     chmod("/usr/bin/setTimeMachine", 06755);
-
-    NSDictionary *settings = loadPrefs();
-    NSString *launchdPlist = @"/Library/LaunchDaemons/com.michael.TimeMachine.plist";
-    NSString *hour = [NSString stringWithFormat:@"%@", settings[@"Hour"]];
-    NSString *minute = [NSString stringWithFormat:@"%@", settings[@"Minute"]];
-    if (hour != nil) {
-        if (is_number([hour UTF8String]) && [hour intValue] < 24) {
-            modifyPlist(launchdPlist, ^(id plist) {
-                plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
-            });
-        } else {
+    CFDictionaryRef settings = loadPrefs();
+    if (settings != NULL) {
+        CFDictionaryContainsKey(settings, CFSTR("Hour"));
+        if (CFDictionaryContainsKey(settings, CFSTR("Hour"))) {
+            CFTypeRef Hour = CFDictionaryGetValue(settings, CFSTR("Hour"));
+            if (CFGetTypeID(Hour) == CFNumberGetTypeID()) {
+                long hour;
+                CFNumberGetValue(Hour, kCFNumberLongType, &hour);
+                CFRelease(Hour);
+                if (hour < 24) {
+                    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
+                        plist[@"StartCalendarInterval"][@"Hour"] = @(hour);
+                    });
+                    goto next;
+                }
+            }
+            CFRelease(Hour);
             CFPreferencesSetValue(CFSTR("Hour"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
-    }
-    if (minute != nil) {
-        if (is_number([minute UTF8String]) && [minute intValue] < 60) {
-            modifyPlist(launchdPlist, ^(id plist) {
-                plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
-            });
-        } else {
+next:
+        if (CFDictionaryContainsKey(settings, CFSTR("Minute"))) {
+            CFTypeRef Minute = CFDictionaryGetValue(settings, CFSTR("Minute"));
+            if (CFGetTypeID(Minute) == CFNumberGetTypeID()) {
+                long minute;
+                CFNumberGetValue(Minute, kCFNumberLongType, &minute);
+                CFRelease(Minute);
+                if (minute < 24) {
+                    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
+                        plist[@"StartCalendarInterval"][@"Minute"] = @(minute);
+                    });
+                    goto out;
+                }
+            }
+            CFRelease(Minute);
             CFPreferencesSetValue(CFSTR("Minute"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         }
+out:
+        CFRelease(settings);
     }
 
     run_system("launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist");

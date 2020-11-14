@@ -13,30 +13,38 @@ int main() {
 
     run_system("/etc/rc.d/snapshotcheck");
 
-    NSDictionary *settings = loadPrefs();
+    CFDictionaryRef settings = loadPrefs();
+    if (settings == NULL) {
+        settings = CFDictionaryCreate(NULL, NULL, NULL, 0, NULL, NULL);
+    }
 
-    if (settings[@"rootfs_enabled"] == nil || [settings[@"rootfs_enabled"] boolValue]) {
+    if (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled")))) {
         int max_snapshot = 3;
-        if (settings[@"max_rootfs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_rootfs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_rootfs_snapshot"] intValue];
+        if (CFDictionaryContainsKey(settings, CFSTR("max_rootfs_snapshot"))) {
+            CFTypeRef num = CFDictionaryGetValue(settings, CFSTR("max_rootfs_snapshot"));
+            if (CFGetTypeID(num) == CFNumberGetTypeID()) {
+                CFNumberGetValue(num, kCFNumberIntType, &max_snapshot);
             } else {
                 CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
+            CFRelease(num);
         }
         do_timemachine("/", true, max_snapshot);
     }
-    if (settings[@"datafs_enabled"] == nil || [settings[@"datafs_enabled"] boolValue]) {
+    if (!CFDictionaryContainsKey(settings, CFSTR("datafs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("datafs_enabled")))) {
         int max_snapshot = 3;
-        if (settings[@"max_datafs_snapshot"]) {
-            if (is_number([[NSString stringWithFormat:@"%@", settings[@"max_datafs_snapshot"]] UTF8String])) {
-                max_snapshot = [settings[@"max_datafs_snapshot"] intValue];
+        if (CFDictionaryContainsKey(settings, CFSTR("max_datafs_snapshot"))) {
+            CFTypeRef num = CFDictionaryGetValue(settings, CFSTR("max_datafs_snapshot"));
+            if (CFGetTypeID(num) == CFNumberGetTypeID()) {
+                CFNumberGetValue(num, kCFNumberIntType, &max_snapshot);
             } else {
                 CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
             }
+            CFRelease(num);
         }
         do_timemachine("/private/var", true, max_snapshot);
     }
+    CFRelease(settings);
 
     printf("TimeMachine on iOS's work is down, enjoy safety.\n\n");
     return 0;

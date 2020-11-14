@@ -131,16 +131,17 @@ void run_system(const char *cmd) {
     }
 }
 
-NSDictionary *loadPrefs() {
+CFDictionaryRef loadPrefs() {
     CFArrayRef keyList = CFPreferencesCopyKeyList(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
     if (keyList != NULL) {
-        NSDictionary *prefs = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost));
+        CFDictionaryRef prefs = CFPreferencesCopyMultiple(keyList, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
         CFRelease(keyList);
         return prefs;
+    } else {
+        removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
+        CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
+        return NULL;
     }
-    removefile("/private/var/mobile/Library/Preferences/com.michael.TimeMachine.plist", NULL, REMOVEFILE_RECURSIVE);
-    CFPreferencesSynchronize(bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-    return nil;
 }
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {
@@ -169,7 +170,7 @@ bool modifyPlist(NSString *filename, void (^function)(id)) {
 }
 
 CFNumberRef newInt(const int value) {
-    return CFNumberCreate(NULL, kCFNumberIntType, &value);
+    return CFAutorelease(CFNumberCreate(NULL, kCFNumberIntType, &value));
 }
 
 int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
