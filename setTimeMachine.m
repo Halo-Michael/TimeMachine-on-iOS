@@ -104,6 +104,7 @@ int f(NSArray *args) {
             usage();
             return 2;
         }
+        realPath = (char *)realloc(realPath, (strlen(realPath) + 1) * sizeof(char));
         filePath = [NSString stringWithFormat:@"%s", realPath];
         free(realPath);
         fileInfo = [NSMutableDictionary dictionaryWithDictionary:[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error]];
