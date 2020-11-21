@@ -144,31 +144,6 @@ CFDictionaryRef loadPrefs() {
     }
 }
 
-bool modifyPlist(NSString *filename, void (^function)(id)) {
-    NSData *data = [NSData dataWithContentsOfFile:filename];
-    if (data == nil) {
-        return false;
-    }
-    NSPropertyListFormat format = 0;
-    id plist = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainersAndLeaves format:&format error:nil];
-    if (plist == nil) {
-        return false;
-    }
-    if (function) {
-        function(plist);
-    }
-    NSData *newData = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:nil];
-    if (newData == nil) {
-        return false;
-    }
-    if (![data isEqual:newData]) {
-        if (![newData writeToFile:filename atomically:YES]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 CFNumberRef newInt(const int value) {
     return CFAutorelease(CFNumberCreate(NULL, kCFNumberIntType, &value));
 }
@@ -206,7 +181,7 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
 
     val_attrs_t buf;
     bzero(&buf, sizeof(buf));
-    NSMutableArray *snapshots = [NSMutableArray array];
+    NSMutableArray *snapshots = [[NSMutableArray alloc] init];
     int retcount;
     while ((retcount = fs_snapshot_list(dirfd, &attr_list, &buf, sizeof(buf), 0))>0) {
         val_attrs_t *entry = &buf;

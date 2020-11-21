@@ -203,12 +203,11 @@ int t(NSArray *args) {
     }
     printf("Will modify time to %s:%s.\n", [hour UTF8String], [minute UTF8String]);
     run_system("launchctl unload /Library/LaunchDaemons/com.michael.TimeMachine.plist");
-    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
-        plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
-    });
-    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
-        plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
-    });
+    NSString *plistFile = @"/Library/LaunchDaemons/com.michael.TimeMachine.plist";
+    NSMutableDictionary *plist = [[NSMutableDictionary alloc] initWithContentsOfFile:plistFile];
+    plist[@"StartCalendarInterval"][@"Hour"] = @([hour integerValue]);
+    plist[@"StartCalendarInterval"][@"Minute"] = @([minute integerValue]);
+    [[NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil] writeToFile:plistFile atomically:YES];
     run_system("launchctl load /Library/LaunchDaemons/com.michael.TimeMachine.plist");
 
     return 0;

@@ -42,9 +42,10 @@ int main() {
                 CFNumberGetValue(Hour, kCFNumberLongType, &hour);
                 CFRelease(Hour);
                 if (hour < 24) {
-                    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
-                        plist[@"StartCalendarInterval"][@"Hour"] = @(hour);
-                    });
+                    NSString *plistFile = @"/Library/LaunchDaemons/com.michael.TimeMachine.plist";
+                    NSMutableDictionary *plist = [[NSMutableDictionary alloc] initWithContentsOfFile:plistFile];
+                    plist[@"StartCalendarInterval"][@"Hour"] = @(hour);
+                    [[NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil] writeToFile:plistFile atomically:YES];
                     goto next;
                 }
             }
@@ -59,9 +60,10 @@ next:
                 CFNumberGetValue(Minute, kCFNumberLongType, &minute);
                 CFRelease(Minute);
                 if (minute < 24) {
-                    modifyPlist(@"/Library/LaunchDaemons/com.michael.TimeMachine.plist", ^(id plist) {
-                        plist[@"StartCalendarInterval"][@"Minute"] = @(minute);
-                    });
+                    NSString *plistFile = @"/Library/LaunchDaemons/com.michael.TimeMachine.plist";
+                    NSMutableDictionary *plist = [[NSMutableDictionary alloc] initWithContentsOfFile:plistFile];
+                    plist[@"StartCalendarInterval"][@"Minute"] = @(minute);
+                    [[NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListBinaryFormat_v1_0 options:0 error:nil] writeToFile:plistFile atomically:YES];
                     goto out;
                 }
             }

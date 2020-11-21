@@ -13,12 +13,6 @@
 #   define bundleID CFSTR("com.michael.TimeMachine")
 #endif
 
-#ifdef __OBJC__
-
-bool modifyPlist(NSString *filename, void (^function)(id));
-
-#endif
-
 CFDictionaryRef loadPrefs();
 bool is_number(const char *num);
 CFNumberRef newInt(const int value);
