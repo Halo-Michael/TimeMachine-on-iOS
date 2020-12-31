@@ -15,7 +15,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: macos-10.14
+    runs-on: macos-10.15
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -25,9 +25,10 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
+          sudo xcode-select -s /Applications/Xcode_11.7.app
           brew install ldid dpkg xz
-          export THEOS=~/theos
-          git clone --recursive https://github.com/Halo-Michael/theos.git $THEOS
+          export THEOS=/opt/theos
+          sudo git clone --recursive https://github.com/Halo-Michael/theos.git $THEOS
           make all
           mkdir build
           cp com.michael.timemachine_*_iphoneos-arm.deb build
