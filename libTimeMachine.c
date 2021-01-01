@@ -1,8 +1,8 @@
-#import <Foundation/Foundation.h>
-#import <regex.h>
-#import <removefile.h>
-#import <sys/snapshot.h>
-#import "utils.h"
+#include <CoreFoundation/CoreFoundation.h>
+#include <regex.h>
+#include <removefile.h>
+#include <sys/snapshot.h>
+#include "utils.h"
 
 __attribute__((aligned(4)))
 typedef struct val_attrs {
@@ -181,7 +181,8 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
 
     val_attrs_t buf;
     bzero(&buf, sizeof(buf));
-    NSMutableArray *snapshots = [[NSMutableArray alloc] init];
+    int number = 0;
+    char **snapshots = (char**)malloc(number * sizeof(char*));
     int retcount;
     while ((retcount = fs_snapshot_list(dirfd, &attr_list, &buf, sizeof(buf), 0))>0) {
         val_attrs_t *entry = &buf;
@@ -190,7 +191,9 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
                 regex_t predicate;
                 regcomp(&predicate, "^(com.apple.TimeMachine.)[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}:[0-9]{2}$", REG_EXTENDED | REG_NEWLINE | REG_NOSUB);
                 if (regexec(&predicate, entry->name, 0, NULL, 0) == 0) {
-                    [snapshots addObject:[NSString stringWithFormat:@"%s", entry->name]];
+                    snapshots = (char**)realloc(snapshots, ++number * sizeof(char*));
+                    snapshots[number - 1] = (char*)calloc(42, sizeof(char));
+                    strcpy(snapshots[number - 1], entry->name);
                 }
                 regfree(&predicate);
             }
@@ -206,11 +209,14 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
     }
 
     int ret = 1;
-    while ([snapshots count] > max_snapshot) {
-        printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", [[snapshots objectAtIndex:0] UTF8String], vol);
-        snapshot_delete(vol, [[snapshots objectAtIndex:0] UTF8String]);
-        [snapshots removeObjectAtIndex:0];
+    for (int no = 0; no < number - max_snapshot; no++) {
+        printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", snapshots[no], vol);
+        snapshot_delete(vol, snapshots[no]);
         ret = 0;
     }
+    for (int no = 0; no < number; no++) {
+        free(snapshots[no]);
+    }
+    free(snapshots);
     return ret;
 }

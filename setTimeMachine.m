@@ -223,7 +223,7 @@ int main(const int argc, const char *argv[]) {
         return 1;
     }
 
-    NSMutableArray *args = [NSMutableArray array];
+    NSMutableArray *args = [[NSMutableArray alloc] init];
     for (int i = 1; i < argc; i++) {
         [args addObject:[[NSString alloc] initWithUTF8String:argv[i]]];
     }

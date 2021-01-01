@@ -1,7 +1,4 @@
-export TARGET = iphone:clang:13.0:10.3
-export ARCHS = arm64 arm64e
-export VERSION = 0.11.11
-export DEBUG = no
+VERSION = 0.11.12
 Package = com.michael.timemachine
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3
 LDID = ldid
@@ -35,7 +32,7 @@ all: clean libTimeMachine postinst prerm TimeMachineRootListController snapshotc
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
 
 libTimeMachine: clean
-	$(CC) -dynamiclib -fobjc-arc -install_name /usr/lib/libTimeMachine.dylib -compatibility_version $(VERSION) -current_version $(VERSION) -framework Foundation libTimeMachine.m -o libTimeMachine.dylib
+	$(CC) -dynamiclib -install_name /usr/lib/libTimeMachine.dylib -compatibility_version $(VERSION) -current_version $(VERSION) -framework CoreFoundation libTimeMachine.c -o libTimeMachine.dylib
 	strip -x libTimeMachine.dylib
 	$(LDID) -S libTimeMachine.dylib
 
