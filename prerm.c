@@ -18,11 +18,11 @@ int main(const int argc, const char *argv[]) {
     if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_11_0) {
         printf("iOS11 or higher version detected, now checking orig snapshot...\n");
         if (snapshot_check("/", "com.apple.TimeMachine.orig-fs")) {
-            printf("Will rename snapshot \"com.apple.TimeMachine.orig-fs\" on fs / to \"orig-fs\"\n");
+            printf("Will rename snapshot \"com.apple.TimeMachine.orig-fs\" on fs / to \"orig-fs\"...\n");
             snapshot_rename("/", "com.apple.TimeMachine.orig-fs", "orig-fs");
         }
         if (snapshot_check("/", "com.apple.TimeMachine.electra-prejailbreak")) {
-            printf("Will rename snapshot \"com.apple.TimeMachine.electra-prejailbreak\" on fs / to \"electra-prejailbreak\"\n");
+            printf("Will rename snapshot \"com.apple.TimeMachine.electra-prejailbreak\" on fs / to \"electra-prejailbreak\"...\n");
             snapshot_rename("/", "com.apple.TimeMachine.electra-prejailbreak", "electra-prejailbreak");
         }
     } else if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_10_3) {

@@ -1,4 +1,5 @@
 #include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
 #include <regex.h>
 #include <removefile.h>
 #include <sys/snapshot.h>
@@ -30,6 +31,44 @@ bool is_number(const char *num) {
         }
     }
     return true;
+}
+
+bool is_sealed(const char *mntpt) {
+    io_registry_entry_t chosen = IORegistryEntryFromPath(kIOMasterPortDefault, "IODeviceTree:/chosen");
+    assert(MACH_PORT_VALID(chosen));
+
+    CFTypeRef firmware = IORegistryEntryCreateCFProperty(chosen, CFSTR("firmware-version"), kCFAllocatorDefault, 0);
+    IOObjectRelease(chosen);
+
+    assert(firmware != NULL);
+    assert(CFGetTypeID(firmware) == CFDataGetTypeID());
+
+    CFStringRef bootloader  = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault, firmware, kCFStringEncodingUTF8);
+    CFRelease(firmware);
+
+    assert(bootloader != NULL);
+
+    if (CFStringHasPrefix(bootloader, CFSTR("pongoOS-"))) {
+        CFRelease(bootloader);
+        return false;
+    }
+    CFRelease(bootloader);
+
+    struct vol_attr {
+        uint32_t len;
+        vol_capabilities_attr_t vol_cap;
+    } vol_attrs = {};
+
+    struct attrlist vol_attr_list = {
+        .bitmapcount = ATTR_BIT_MAP_COUNT,
+        .volattr = ATTR_VOL_CAPABILITIES
+    };
+
+    if (!getattrlist(mntpt, &vol_attr_list, &vol_attrs, sizeof(vol_attrs), 0) &&
+        vol_attrs.vol_cap.valid[VOL_CAPABILITIES_FORMAT] & VOL_CAP_FMT_SEALED) {
+        return (vol_attrs.vol_cap.capabilities[VOL_CAPABILITIES_FORMAT] & VOL_CAP_FMT_SEALED);
+    }
+    return false;
 }
 
 int snapshot_create(const char *vol, const char *snap) {
@@ -155,7 +194,7 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
         const char *format = "com.apple.TimeMachine.%Y-%m-%d-%H:%M:%S";
         char *cre_snapshot = (char *)calloc(42, sizeof(char));
         strftime(cre_snapshot, 42, format, tmTime);
-        printf("Will create snapshot named \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
+        printf("Will create snapshot \"%s\" on fs \"%s\"...\n", cre_snapshot, vol);
         if (strcmp(vol, "/") == 0) {
             removefile("/.com.michael.TimeMachine", NULL, REMOVEFILE_RECURSIVE);
             FILE *fp = fopen("/.com.michael.TimeMachine", "w");
@@ -210,7 +249,7 @@ int do_timemachine(const char *vol, const bool create, const int max_snapshot) {
 
     int ret = 1;
     for (int no = 0; no < number - max_snapshot; no++) {
-        printf("Will delete snapshot named \"%s\" on fs \"%s\"...\n", snapshots[no], vol);
+        printf("Will delete snapshot \"%s\" on fs \"%s\"...\n", snapshots[no], vol);
         snapshot_delete(vol, snapshots[no]);
         ret = 0;
     }

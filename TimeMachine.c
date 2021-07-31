@@ -18,7 +18,7 @@ int main() {
         settings = CFDictionaryCreate(NULL, NULL, NULL, 0, NULL, NULL);
     }
 
-    if (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled")))) {
+    if (!is_sealed("/") && (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled"))))) {
         int max_snapshot = 3;
         if (CFDictionaryContainsKey(settings, CFSTR("max_rootfs_snapshot"))) {
             CFTypeRef num = CFDictionaryGetValue(settings, CFSTR("max_rootfs_snapshot"));

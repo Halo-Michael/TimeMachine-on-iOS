@@ -19,7 +19,7 @@ void showSettings() {
         settings = CFDictionaryCreate(NULL, NULL, NULL, 0, NULL, NULL);
     }
     int max_rootfs_snapshot = 3, max_datafs_snapshot = 3;
-    if (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled")))) {
+    if (!is_sealed("/") && (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled"))))) {
         printf("TimeMachine for rootfs is enabled.\n");
     } else {
         printf("TimeMachine for rootfs is disabled.\n");
@@ -29,17 +29,17 @@ void showSettings() {
         if (CFGetTypeID(num) == CFNumberGetTypeID()) {
             CFNumberGetValue(num, kCFNumberIntType, &max_rootfs_snapshot);
             if (max_rootfs_snapshot != 0) {
-                printf("Will save up to %d snapshots for rootfs\n", max_rootfs_snapshot);
+                printf("Will save up to %d snapshots for rootfs.\n", max_rootfs_snapshot);
             } else {
-                printf("Won't save snapshot for rootfs\n");
+                printf("Won't save snapshot for rootfs.\n");
             }
         } else {
             CFPreferencesSetValue(CFSTR("max_rootfs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+            printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default).\n");
         }
         CFRelease(num);
     } else {
-        printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default)\n");
+        printf("The max number of snapshots has not been set for rootfs (up to 3 snapshots will be saved by default).\n");
     }
     if (!CFDictionaryContainsKey(settings, CFSTR("datafs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("datafs_enabled")))) {
         printf("TimeMachine for datafs is enabled.\n");
@@ -51,17 +51,17 @@ void showSettings() {
         if (CFGetTypeID(num) == CFNumberGetTypeID()) {
             CFNumberGetValue(num, kCFNumberIntType, &max_datafs_snapshot);
             if (max_datafs_snapshot != 0) {
-                printf("Will save up to %d snapshots for datafs\n", max_datafs_snapshot);
+                printf("Will save up to %d snapshots for datafs.\n", max_datafs_snapshot);
             } else {
-                printf("Won't save snapshot for datafs\n");
+                printf("Won't save snapshot for datafs.\n");
             }
         } else {
             CFPreferencesSetValue(CFSTR("max_datafs_snapshot"), NULL, bundleID, CFSTR("mobile"), kCFPreferencesAnyHost);
-            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+            printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default).\n");
         }
         CFRelease(num);
     } else {
-        printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default)\n");
+        printf("The max number of snapshots has not been set for datafs (up to 3 snapshots will be saved by default).\n");
     }
     CFRelease(settings);
 }
@@ -132,7 +132,7 @@ int f(NSArray *args) {
             if (settings == NULL) {
                 settings = CFDictionaryCreate(NULL, NULL, NULL, 0, NULL, NULL);
             }
-            if (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled")))) {
+            if (!is_sealed("/") && (!CFDictionaryContainsKey(settings, CFSTR("rootfs_enabled")) || CFBooleanGetValue(CFDictionaryGetValue(settings, CFSTR("rootfs_enabled"))))) {
                 printf("Now delete the extra snapshot.\n");
                 if (do_timemachine("/", false, [number intValue]) == 0) {
                     printf("Successfully delete the extra snapshot.\n");

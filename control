@@ -1,10 +1,10 @@
 Package: com.michael.timemachine
-Version: 0.11.12
+Version: 0.12.0
 Section: Tweaks
 Name: TimeMachine on iOS
-Author: halo_michael <yc992147156@me.com>
-Sponsor: halo_michael <yc992147156@me.com>
-Maintainer: halo_michael <yc992147156@me.com>
+Author: Halo Michael <yc992147156@me.com>
+Sponsor: Halo Michael <yc992147156@me.com>
+Maintainer: Halo Michael <yc992147156@me.com>
 Depends: firmware (>= 10.3), launchctl, preferenceloader
 Replaces: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
 Conflicts: com.michael.TimeMachineLite, com.yourepo.halo-michael.timemachineonios, com.yourepo.halo-michael.timemachineonioslite
