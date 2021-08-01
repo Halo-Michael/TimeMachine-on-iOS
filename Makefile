@@ -1,6 +1,7 @@
 VERSION = 0.12.0
 Package = com.michael.timemachine
-CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS14.3.sdk clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3 -Os
+SDK = ${THEOS}/sdks/iPhoneOS14.3.sdk
+CC = xcrun -sdk $(SDK) clang -arch arm64 -arch arm64e -miphoneos-version-min=10.3 -Os
 LDID = ldid
 
 .PHONY: all clean
@@ -52,7 +53,7 @@ snapshotcheck: libTimeMachine
 	$(LDID) -Sentitlements-apfs.xml snapshotcheck
 
 TimeMachineRootListController: libTimeMachine
-	$(CC) -dynamiclib -fobjc-arc -install_name /Library/PreferenceBundles/TimeMachine.bundle/TimeMachine -I${THEOS}/vendor/include/ -framework Foundation ${THEOS}/sdks/iPhoneOS13.0.sdk/System/Library/PrivateFrameworks/Preferences.framework/Preferences.tbd libTimeMachine.dylib TimeMachineRootListController.m -o TimeMachineRootListController
+	$(CC) -dynamiclib -fobjc-arc -install_name /Library/PreferenceBundles/TimeMachine.bundle/TimeMachine -I${THEOS}/vendor/include/ -framework Foundation -F $(SDK)/System/Library/PrivateFrameworks -framework Preferences libTimeMachine.dylib TimeMachineRootListController.m -o TimeMachineRootListController
 	strip -x TimeMachineRootListController
 	$(LDID) -S TimeMachineRootListController
 
@@ -68,7 +69,3 @@ TimeMachine: libTimeMachine
 
 clean:
 	rm -rf $(Package)_* libTimeMachine.dylib postinst prerm TimeMachineRootListController snapshotcheck setTimeMachine TimeMachine
-
-install:
-	scp $(Package)_$(VERSION)_iphoneos-arm.deb root@$(THEOS_DEVICE_IP):/tmp/_theos_install.deb
-	ssh root@$(THEOS_DEVICE_IP) dpkg -i /tmp/_theos_install.deb
